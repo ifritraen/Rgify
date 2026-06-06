@@ -10,6 +10,7 @@ import '../widgets/video_card.dart';
 import '../creator/creator_profile_screen.dart';
 import '../player/tag_results_screen.dart';
 import '../widgets/bulk_action_bar.dart';
+import '../widgets/glassy_container.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -113,7 +114,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isSelected ? AppTheme.primaryNeon : Colors.white.withAlpha(15),
+          color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight,
         ),
       ),
       onSelected: (_) => onTap(),
@@ -177,19 +178,18 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(80),
+                  color: AppTheme.glassBg,
                   border: Border(
-                    bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1.0),
+                    bottom: BorderSide(color: AppTheme.border, width: 1.0),
                   ),
                 ),
                 child: TabBar(
                   controller: _tabController,
-                  // indicatorColor: AppTheme.primaryNeon,
                   indicator: const UnderlineTabIndicator(
                     borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
                     insets: EdgeInsets.symmetric(horizontal: 16),
                   ),
-                  labelColor: Colors.white,
+                  labelColor: AppTheme.textPrimary,
                   unselectedLabelColor: AppTheme.textSecondary,
                   labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
@@ -249,7 +249,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     child: Center(child: Text('Error: ${provider.gifError}', style: const TextStyle(color: Colors.redAccent))),
                   )
                 else if (provider.gifs.isEmpty && !provider.isLoadingGifs)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(child: Text('No GIFs found.', style: TextStyle(color: AppTheme.textSecondary))),
                   )
                 else ...[
@@ -309,7 +309,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     child: Center(child: Text('Error: ${provider.imageError}', style: const TextStyle(color: Colors.redAccent))),
                   )
                 else if (provider.images.isEmpty && !provider.isLoadingImages)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(child: Text('No images found.', style: TextStyle(color: AppTheme.textSecondary))),
                   )
                 else ...[
@@ -369,7 +369,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     child: Center(child: Text('Error: ${provider.creatorError}', style: const TextStyle(color: Colors.redAccent))),
                   )
                 else if (provider.creators.isEmpty && !provider.isLoadingCreators)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(child: Text('No creators found.', style: TextStyle(color: AppTheme.textSecondary))),
                   )
                 else ...[
@@ -379,12 +379,9 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final creator = provider.creators[index];
-                          return Card(
+                          return GlassyContainer(
                             color: AppTheme.cardBg,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: Colors.white.withAlpha(15)),
-                            ),
+                            borderColor: AppTheme.border,
                             margin: const EdgeInsets.only(bottom: 12),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -403,7 +400,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                                   Expanded(
                                     child: Text(
                                       creator.name.isNotEmpty ? creator.name : creator.username,
-                                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                      style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -418,7 +415,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
                                   '@${creator.username} • ${creator.followers} followers • ${creator.views} views',
-                                  style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+                                  style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
                                 ),
                               ),
                               onTap: () {
@@ -493,7 +490,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     backgroundColor: AppTheme.cardBg,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: isSelected ? AppTheme.primaryNeon : Colors.white.withAlpha(15)),
+                      side: BorderSide(color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight),
                     ),
                     onSelected: (selected) {
                       if (selected) {
@@ -548,7 +545,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     child: Center(child: Text('Error: ${provider.nicheGifsError}', style: const TextStyle(color: Colors.redAccent))),
                   )
                 else if (provider.nicheGifs.isEmpty && !provider.isLoadingNicheGifs)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(child: Text('No content found for this niche.', style: TextStyle(color: AppTheme.textSecondary))),
                   )
                 else ...[
@@ -602,14 +599,14 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
             controller: _tagSearchController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: 'Filter tags...',
-              hintStyle: const TextStyle(color: Colors.white38),
-              prefixIcon: const Icon(Icons.filter_list, color: Colors.white54),
+              hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.7)),
+              prefixIcon: Icon(Icons.filter_list, color: AppTheme.textSecondary.withOpacity(0.8)),
               suffixIcon: _tagSearchQuery.isNotEmpty
                   ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.white54),
+                      icon: Icon(Icons.clear, color: AppTheme.textSecondary.withOpacity(0.8)),
                       onPressed: () => _tagSearchController.clear(),
                     )
                   : null,
@@ -618,7 +615,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: Colors.white.withAlpha(20)),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(30),
@@ -642,11 +639,10 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                         ),
                       )
                     : filteredTags.isEmpty
-                        ? const SingleChildScrollView(
-                            // physics: const AlwaysScrollableScrollPhysics(),
-                            physics: AlwaysScrollableScrollPhysics(),
+                        ? SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 40),
+                              padding: const EdgeInsets.symmetric(vertical: 40),
                               child: Center(child: Text('No tags match filters.', style: TextStyle(color: AppTheme.textSecondary))),
                             ),
                           )
@@ -662,11 +658,11 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                                   final count = tag['count'] as int? ?? 0;
                                   return ActionChip(
                                     backgroundColor: AppTheme.cardBg,
-                                    side: BorderSide(color: Colors.white.withAlpha(15)),
+                                    side: BorderSide(color: AppTheme.borderLight),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                     label: Text(
                                       '#$name ($count)',
-                                      style: const TextStyle(color: Colors.white70, fontSize: 11),
+                                      style: TextStyle(color: AppTheme.textSecondary.withOpacity(0.9), fontSize: 11),
                                     ),
                                     onPressed: () {
                                       Navigator.push(

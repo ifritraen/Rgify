@@ -43,15 +43,12 @@ class _TagResultsScreenState extends State<TagResultsScreen> {
         elevation: 0,
         title: Text(
           '#${widget.tag}',
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: AppTheme.textPrimary,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
-        ),
+        iconTheme: IconThemeData(color: AppTheme.textPrimary),
       ),
       body: Stack(
         children: [
@@ -77,7 +74,7 @@ class _TagResultsScreenState extends State<TagResultsScreen> {
                           ),
                         )
                       else if (search.searchResults.isEmpty && !search.isLoading)
-                        const SliverFillRemaining(
+                        SliverFillRemaining(
                           child: Center(
                             child: Text(
                               'No content found for this tag.',

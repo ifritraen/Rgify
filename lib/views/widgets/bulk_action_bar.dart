@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/selection_provider.dart';
@@ -5,6 +6,7 @@ import '../../providers/library_provider.dart';
 import '../../config/theme.dart';
 import '../../models/gif_info.dart';
 import '../../services/download_service.dart';
+import 'glassy_container.dart';
 
 class BulkActionBar extends StatefulWidget {
   const BulkActionBar({super.key});
@@ -59,20 +61,24 @@ class _BulkActionBarState extends State<BulkActionBar> {
 
   void _showCreatePlaylistDialog(BuildContext context, LibraryProvider library) {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final hintColor = isDark ? Colors.white38 : AppTheme.textSecondary.withOpacity(0.6);
+
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: AppTheme.background,
-          title: const Text('New Playlist', style: TextStyle(color: Colors.white)),
+          title: Text('New Playlist', style: TextStyle(color: textColor)),
           content: TextField(
             controller: controller,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: textColor),
             decoration: InputDecoration(
               hintText: 'Enter playlist name...',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: hintColor),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white.withAlpha(50)),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: AppTheme.primaryNeon),
@@ -82,7 +88,7 @@ class _BulkActionBarState extends State<BulkActionBar> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -101,90 +107,104 @@ class _BulkActionBarState extends State<BulkActionBar> {
   }
 
   void _bulkAddToPlaylist(BuildContext context, List<GifInfo> gifs, LibraryProvider library, SelectionProvider selection) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? Colors.black.withAlpha(200) : Colors.white.withAlpha(235);
+    final borderColor = isDark ? Colors.white.withAlpha(20) : Colors.black.withAlpha(15);
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final subtitleColor = isDark ? Colors.white60 : AppTheme.textSecondary;
+
     showModalBottomSheet(
       context: context,
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (bottomSheetContext) {
-        return SafeArea(
-          child: Consumer<LibraryProvider>(
-            builder: (context, libProvider, child) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // const Padding(
-                  //   padding: EdgeInsets.symmetric(vertical: 16),
-                  //   child: Text(
-                  //     'Select Playlist for Bulk Add',
-                  //     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  //   ),
-                  // ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: sheetBg,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
+                border: Border.all(color: borderColor),
+              ),
+              child: SafeArea(
+                child: Consumer<LibraryProvider>(
+                  builder: (context, libProvider, child) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Text(
-                          'Select Playlist for Bulk Add',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Select Playlist for Bulk Add',
+                                style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add, color: AppTheme.primaryNeon),
+                                onPressed: () => _showCreatePlaylistDialog(context, libProvider),
+                              ),
+                            ],
+                          ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.add, color: AppTheme.primaryNeon),
-                          onPressed: () => _showCreatePlaylistDialog(context, libProvider),
+                        Divider(color: borderColor, height: 1),
+                        Flexible(
+                          child: libProvider.playlists.isEmpty
+                              ? Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(24.0),
+                                    child: Text('No playlists found.', style: TextStyle(color: subtitleColor)),
+                                  ),
+                                )
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: libProvider.playlists.length,
+                                  itemBuilder: (context, index) {
+                                    final p = libProvider.playlists[index];
+                                    return ListTile(
+                                      leading: const Icon(Icons.playlist_play, color: AppTheme.primaryNeon),
+                                      title: Text(p.name, style: TextStyle(color: textColor)),
+                                      onTap: () async {
+                                        Navigator.pop(bottomSheetContext);
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(content: Text('Adding items to playlist...'), duration: Duration(seconds: 1)),
+                                        );
+                                        
+                                        for (var gif in gifs) {
+                                          await libProvider.addToPlaylist(p.id, gif);
+                                        }
+                                        
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text('Successfully added ${gifs.length} items to ${p.name}!'),
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          );
+                                        }
+                                        selection.exitSelectionMode();
+                                      },
+                                    );
+                                  },
+                                ),
                         ),
                       ],
-                    ),
-                  ),
-                  const Divider(color: Colors.white12, height: 1),
-                  Flexible(
-                    // child: library.playlists.isEmpty
-                    child: libProvider.playlists.isEmpty
-                        ? const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(24.0),
-                              child: Text('No playlists found.', style: TextStyle(color: Colors.white60)),
-                            ),
-                          )
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            // itemCount: library.playlists.length,
-                            itemCount: libProvider.playlists.length,
-                            itemBuilder: (context, index) {
-                              // final p = library.playlists[index];
-                              final p = libProvider.playlists[index];
-                              return ListTile(
-                                leading: const Icon(Icons.playlist_play, color: AppTheme.primaryNeon),
-                                title: Text(p.name, style: const TextStyle(color: Colors.white)),
-                                onTap: () async {
-                                  Navigator.pop(bottomSheetContext);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Adding items to playlist...'), duration: Duration(seconds: 1)),
-                                  );
-                                  
-                                  for (var gif in gifs) {
-                                    // await library.addToPlaylist(p.id, gif);
-                                    await libProvider.addToPlaylist(p.id, gif);
-                                  }
-                                  
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Successfully added ${gifs.length} items to ${p.name}!'),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
-                                  }
-                                  selection.exitSelectionMode();
-                                },
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              );
-            },
+                    );
+                  },
+                ),
+              ),
+            ),
           ),
         );
       },
@@ -205,6 +225,9 @@ class _BulkActionBarState extends State<BulkActionBar> {
   Widget build(BuildContext context) {
     final selection = Provider.of<SelectionProvider>(context);
     final library = Provider.of<LibraryProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final iconColor = isDark ? Colors.white70 : AppTheme.textSecondary;
 
     if (!selection.isSelectionMode) return const SizedBox.shrink();
 
@@ -214,75 +237,71 @@ class _BulkActionBarState extends State<BulkActionBar> {
       bottom: 20,
       left: 16,
       right: 16,
-      child: Material(
-        elevation: 10,
-        // color: AppTheme.background.withOpacity(0.95),
-        color: AppTheme.background.withAlpha(242),
-        borderRadius: BorderRadius.circular(30),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(30),
-            // border: Border.all(color: AppTheme.primaryNeon.withOpacity(0.3)),
-            border: Border.all(color: AppTheme.primaryNeon.withAlpha(76)),
-          ),
-          child: _isDownloading
-              ? Row(
-                  children: [
-                    const CircularProgressIndicator(color: AppTheme.primaryNeon, strokeWidth: 3),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Text(
-                        _downloadStatus,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      height: 62,
+      child: GlassyContainer(
+        borderRadius: 31,
+        color: AppTheme.glassBg,
+        borderColor: AppTheme.primaryNeon.withOpacity(0.3),
+        borderWidth: 1.0,
+        boxShadow: AppTheme.cardGlow,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: _isDownloading
+            ? Row(
+                children: [
+                  const SizedBox(width: 8),
+                  const CircularProgressIndicator(color: AppTheme.primaryNeon, strokeWidth: 3),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      _downloadStatus,
+                      style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.close, color: iconColor),
+                        onPressed: () => selection.exitSelectionMode(),
                       ),
-                    ),
-                  ],
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white70),
-                          onPressed: () => selection.exitSelectionMode(),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${selection.selectedCount} selected',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.playlist_add, color: AppTheme.primaryNeon),
-                          tooltip: 'Add all to Playlist',
-                          onPressed: selectedGifs.isEmpty
-                              ? null
-                              : () => _bulkAddToPlaylist(context, selectedGifs, library, selection),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.favorite, color: AppTheme.primaryNeon),
-                          tooltip: 'Toggle Favorites',
-                          onPressed: selectedGifs.isEmpty
-                              ? null
-                              : () => _bulkFavorite(context, selectedGifs, library, selection),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.download, color: Colors.white),
-                          tooltip: 'Download All',
-                          onPressed: selectedGifs.isEmpty
-                              ? null
-                              : () => _bulkDownload(context, selectedGifs, selection),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-        ),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${selection.selectedCount} selected',
+                        style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.playlist_add, color: AppTheme.primaryNeon),
+                        tooltip: 'Add all to Playlist',
+                        onPressed: selectedGifs.isEmpty
+                            ? null
+                            : () => _bulkAddToPlaylist(context, selectedGifs, library, selection),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.favorite, color: AppTheme.primaryNeon),
+                        tooltip: 'Toggle Favorites',
+                        onPressed: selectedGifs.isEmpty
+                            ? null
+                            : () => _bulkFavorite(context, selectedGifs, library, selection),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.download, color: isDark ? Colors.white : AppTheme.textPrimaryLight),
+                        tooltip: 'Download All',
+                        onPressed: selectedGifs.isEmpty
+                            ? null
+                            : () => _bulkDownload(context, selectedGifs, selection),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
       ),
     );
   }

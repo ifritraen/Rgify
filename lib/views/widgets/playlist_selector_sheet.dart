@@ -28,15 +28,15 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppTheme.background,
-          title: const Text('New Playlist', style: TextStyle(color: Colors.white)),
+          title: Text('New Playlist', style: TextStyle(color: AppTheme.textPrimary)),
           content: TextField(
             controller: _playlistNameController,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: AppTheme.textPrimary),
             decoration: InputDecoration(
               hintText: 'Enter playlist name...',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.6)),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white.withAlpha(50)),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: AppTheme.primaryNeon),
@@ -46,7 +46,7 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -71,9 +71,9 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
 
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppTheme.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -82,10 +82,10 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Save to Playlist',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: AppTheme.textPrimary,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -103,7 +103,7 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
               child: Center(
                 child: Text(
                   'No playlists created yet.',
-                  style: TextStyle(color: Colors.white.withAlpha(100)),
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
               ),
             )
@@ -123,11 +123,11 @@ class _PlaylistSelectorSheetState extends State<PlaylistSelectorSheet> {
                     ),
                     title: Text(
                       playlist.name,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: AppTheme.textPrimary),
                     ),
                     subtitle: Text(
                       '${playlist.items.length} items',
-                      style: TextStyle(color: Colors.white.withAlpha(100)),
+                      style: TextStyle(color: AppTheme.textSecondary),
                     ),
                     trailing: containsGif
                         ? const Icon(Icons.check, color: AppTheme.primaryNeon)

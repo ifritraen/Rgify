@@ -4,6 +4,7 @@ import '../../providers/creator_profile_provider.dart';
 import '../../config/theme.dart';
 import '../widgets/video_card.dart';
 import '../widgets/bulk_action_bar.dart';
+import '../widgets/glassy_container.dart';
 
 class CreatorProfileScreen extends StatefulWidget {
   final String username;
@@ -42,12 +43,14 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CreatorProfileProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('@${widget.username}'),
+        title: Text('@${widget.username}', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: AppTheme.textPrimary),
       ),
       body: Stack(
         children: [
@@ -77,14 +80,12 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                         slivers: [
                           // Glassmorphic User Profile Header Card
                           SliverToBoxAdapter(
-                            child: Container(
+                            child: GlassyContainer(
+                              borderRadius: 24,
                               margin: const EdgeInsets.all(16),
                               padding: const EdgeInsets.all(20),
-                              decoration: BoxDecoration(
-                                color: AppTheme.cardBg,
-                                borderRadius: BorderRadius.circular(24),
-                                border: Border.all(color: Colors.white.withAlpha(15)),
-                              ),
+                              color: AppTheme.cardBg,
+                              borderColor: AppTheme.border,
                               child: Column(
                                 children: [
                                   // Avatar Row
@@ -95,7 +96,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                                         ? NetworkImage(provider.userInfo!.profileImageUrl!)
                                         : null,
                                     child: provider.userInfo?.profileImageUrl == null
-                                        ? const Icon(Icons.person, size: 48, color: Colors.white)
+                                        ? Icon(Icons.person, size: 48, color: isDark ? Colors.white : AppTheme.textPrimaryLight)
                                         : null,
                                   ),
                                   const SizedBox(height: 12),
@@ -106,7 +107,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                                       Text(
                                         provider.userInfo?.name ?? widget.username,
                                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                              color: Colors.white,
+                                              color: AppTheme.textPrimary,
                                               fontWeight: FontWeight.bold,
                                             ),
                                       ),
@@ -119,17 +120,17 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                                   const SizedBox(height: 4),
                                   Text(
                                     '@${widget.username}',
-                                    style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                                    style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Divider(color: Colors.white10),
+                                  Divider(color: AppTheme.border),
                                   const SizedBox(height: 12),
                                   // Profile stats count
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
                                       _buildStatColumn('Followers', '${provider.userInfo?.followers ?? 0}'),
-                                      Container(width: 1, height: 24, color: Colors.white10),
+                                      Container(width: 1, height: 24, color: AppTheme.border),
                                       _buildStatColumn('Views', '${provider.userInfo?.views ?? 0}'),
                                     ],
                                   ),
@@ -149,7 +150,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
                               ),
                             )
                           else if (provider.creatorGifs.isEmpty && !provider.isLoadingGifs)
-                            const SliverFillRemaining(
+                            SliverFillRemaining(
                               child: Center(
                                 child: Text(
                                   'No uploads found.',
@@ -203,8 +204,8 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: AppTheme.textPrimary,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -212,7 +213,7 @@ class _CreatorProfileScreenState extends State<CreatorProfileScreen> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 11),
+          style: TextStyle(color: AppTheme.textSecondary, fontSize: 11),
         ),
       ],
     );

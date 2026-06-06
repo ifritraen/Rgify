@@ -12,6 +12,7 @@ import '../library/library_screen.dart';
 import '../ai/ai_screen.dart';
 import '../profile/me_profile_screen.dart';
 import '../widgets/bulk_action_bar.dart';
+import '../widgets/glassy_container.dart';
 import '../../providers/selection_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -84,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: isSelected ? AppTheme.primaryNeon : Colors.white.withAlpha(15),
+          color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight,
         ),
       ),
       onSelected: (selected) {
@@ -149,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   decoration: BoxDecoration(
                     color: AppTheme.cardBg,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.white.withAlpha(20)),
+                    border: Border.all(color: AppTheme.border),
                   ),
                   child: Row(
                     children: [
@@ -159,11 +160,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: RichText(
                           text: TextSpan(
                             text: 'Search results for ',
-                            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                            style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
                             children: [
                               TextSpan(
                                 text: '"${search.currentQuery}"',
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 13),
                               ),
                             ],
                           ),
@@ -173,11 +174,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: _clearSearch,
                         child: Container(
                           padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.white10,
+                          decoration: BoxDecoration(
+                            color: AppTheme.borderLight,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.close, color: Colors.white70, size: 14),
+                          child: Icon(Icons.close, color: AppTheme.textSecondary, size: 14),
                         ),
                       ),
                     ],
@@ -230,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   )
                 else if (gifs.isEmpty && !isLoading)
-                  const SliverFillRemaining(
+                  SliverFillRemaining(
                     child: Center(
                       child: Text(
                         'No content found.',
@@ -363,35 +364,22 @@ class _HomeScreenState extends State<HomeScreen> {
               left: 24,
               right: 24,
               height: 54,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(27),
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(140),
-                      borderRadius: BorderRadius.circular(27),
-                      border: Border.all(color: Colors.white.withAlpha(30), width: 1.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(80),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-                        _buildNavItem(1, Icons.explore_outlined, Icons.explore, 'Explore'),
-                        _buildNavItem(-1, Icons.search_outlined, Icons.search, 'Search', onTapOverride: _showSearchBottomSheet),
-                        _buildNavItem(2, Icons.bookmark_outline, Icons.bookmark, 'Library'),
-                        _buildNavItem(3, Icons.psychology_outlined, Icons.psychology, 'AI Gen'),
-                        _buildNavItem(4, Icons.person_outline, Icons.person, 'Me'),
-                      ],
-                    ),
-                  ),
+              child: GlassyContainer(
+                borderRadius: 27,
+                color: AppTheme.glassBg,
+                borderColor: AppTheme.border,
+                borderWidth: 1.0,
+                boxShadow: AppTheme.cardGlow,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
+                    _buildNavItem(1, Icons.explore_outlined, Icons.explore, 'Explore'),
+                    _buildNavItem(-1, Icons.search_outlined, Icons.search, 'Search', onTapOverride: _showSearchBottomSheet),
+                    _buildNavItem(2, Icons.bookmark_outline, Icons.bookmark, 'Library'),
+                    _buildNavItem(3, Icons.psychology_outlined, Icons.psychology, 'AI Gen'),
+                    _buildNavItem(4, Icons.person_outline, Icons.person, 'Me'),
+                  ],
                 ),
               ),
             ),
@@ -402,6 +390,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showSearchBottomSheet() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? Colors.black.withAlpha(200) : Colors.white.withAlpha(235);
+    final borderColor = isDark ? Colors.white.withAlpha(20) : Colors.black.withAlpha(15);
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final hintColor = isDark ? Colors.white38 : AppTheme.textSecondary;
+    final fillColor = isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(10);
+    final scrollbarColor = isDark ? Colors.white24 : Colors.black12;
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -422,12 +418,12 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(200),
+                  color: sheetBg,
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(24),
                     topRight: Radius.circular(24),
                   ),
-                  border: Border.all(color: Colors.white.withAlpha(20)),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -436,25 +432,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: scrollbarColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
                     const SizedBox(height: 20),
                     TextField(
                       controller: localSearchController,
-                      style: const TextStyle(color: Colors.white),
+                      style: TextStyle(color: textColor),
                       autofocus: true,
                       decoration: InputDecoration(
                         hintText: 'Search Gifs & Niches...',
-                        hintStyle: const TextStyle(color: Colors.white38),
+                        hintStyle: TextStyle(color: hintColor),
                         prefixIcon: const Icon(Icons.search, color: AppTheme.primaryNeon),
                         filled: true,
-                        fillColor: Colors.white.withAlpha(10),
+                        fillColor: fillColor,
                         contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
-                          borderSide: BorderSide(color: Colors.white.withAlpha(20)),
+                          borderSide: BorderSide(color: borderColor),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),

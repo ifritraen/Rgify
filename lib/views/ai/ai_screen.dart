@@ -96,7 +96,7 @@ class _AIScreenState extends State<AIScreen> {
                 ),
               )
             else if (provider.gifs.isEmpty && !provider.isLoading)
-              const SliverFillRemaining(
+              SliverFillRemaining(
                 child: Center(
                   child: Text(
                     'No AI content found.',

@@ -8,6 +8,7 @@ import 'providers/ai_provider.dart';
 import 'providers/creator_profile_provider.dart';
 import 'providers/selection_provider.dart';
 import 'providers/explore_provider.dart';
+import 'providers/theme_provider.dart';
 import 'config/theme.dart';
 import 'views/home/home_screen.dart';
 
@@ -15,6 +16,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => FeedProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
         ChangeNotifierProvider(create: (_) => NichesProvider()),
@@ -34,9 +36,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    // Sync the global isDark state so AppTheme static getters return the correct themed colors
+    AppTheme.isDark = themeProvider.isDarkMode;
+
     return MaterialApp(
       title: 'Rgify',
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
     );

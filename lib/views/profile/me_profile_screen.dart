@@ -6,8 +6,10 @@ import '../../config/theme.dart';
 import '../../services/isar_service.dart';
 import '../../providers/explore_provider.dart';
 import '../../providers/search_provider.dart';
+import '../../providers/theme_provider.dart';
 import '../creator/creator_profile_screen.dart';
 import '../player/tag_results_screen.dart';
+import '../widgets/glassy_container.dart';
 
 class MeProfileScreen extends StatefulWidget {
   const MeProfileScreen({super.key});
@@ -80,6 +82,13 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
   }
 
   void _showAllStatsDialog(String title, List<MapEntry<String, int>> items, Function(String) onTapItem) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? Colors.black.withAlpha(200) : Colors.white.withAlpha(235);
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final subtitleColor = isDark ? Colors.white.withAlpha(100) : AppTheme.textSecondary;
+    final borderColor = isDark ? Colors.white.withAlpha(20) : Colors.black.withAlpha(15);
+    final cardBgColor = isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(10);
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -95,12 +104,12 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
             child: Container(
               height: MediaQuery.of(context).size.height * 0.75,
               decoration: BoxDecoration(
-                color: Colors.black.withAlpha(200),
+                color: sheetBg,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(24),
                   topRight: Radius.circular(24),
                 ),
-                border: Border.all(color: Colors.white.withAlpha(20)),
+                border: Border.all(color: borderColor),
               ),
               child: Column(
                 children: [
@@ -109,7 +118,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.white24,
+                      color: isDark ? Colors.white24 : Colors.black12,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -117,7 +126,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                   Text(
                     title,
                     style: GoogleFonts.outfit(
-                      color: Colors.white,
+                      color: textColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -128,7 +137,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                         ? Center(
                             child: Text(
                               'No data available',
-                              style: TextStyle(color: Colors.white.withAlpha(100)),
+                              style: TextStyle(color: subtitleColor),
                             ),
                           )
                         : ListView.builder(
@@ -140,9 +149,9 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 8),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withAlpha(10),
+                                  color: cardBgColor,
                                   borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.white.withAlpha(10)),
+                                  border: Border.all(color: borderColor),
                                 ),
                                 child: ListTile(
                                   leading: Container(
@@ -156,7 +165,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                                               ? AppTheme.secondaryNeon.withAlpha(50)
                                               : rank == 3
                                                   ? AppTheme.accentNeon.withAlpha(50)
-                                                  : Colors.white.withAlpha(20),
+                                                  : (isDark ? Colors.white.withAlpha(20) : Colors.black.withAlpha(15)),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Text(
@@ -170,7 +179,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                                   ),
                                   title: Text(
                                     entry.key,
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                                    style: TextStyle(color: textColor, fontWeight: FontWeight.w600),
                                   ),
                                   trailing: Text(
                                     '${entry.value} views',
@@ -195,6 +204,9 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
   }
 
   Widget _buildSectionHeader(String title, List<MapEntry<String, int>> allItems, Function(String) onTapItem) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 12),
       child: Row(
@@ -203,7 +215,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
           Text(
             title,
             style: GoogleFonts.outfit(
-              color: Colors.white,
+              color: textColor,
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
@@ -225,6 +237,11 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
   }
 
   Widget _buildStatsList(List<MapEntry<String, int>> items, Function(String) onTapItem, {required String prefix}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final borderBgColor = isDark ? Colors.white.withAlpha(10) : Colors.black.withAlpha(10);
+    final nonPodiumBg = isDark ? Colors.white.withAlpha(15) : Colors.black.withAlpha(10);
+
     if (items.isEmpty) {
       return Container(
         height: 80,
@@ -232,9 +249,9 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
         decoration: BoxDecoration(
           color: AppTheme.cardBg,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withAlpha(10)),
+          border: Border.all(color: borderBgColor),
         ),
-        child: const Text(
+        child: Text(
           'No views recorded yet',
           style: TextStyle(color: AppTheme.textSecondary, fontSize: 13),
         ),
@@ -257,7 +274,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
             border: Border.all(
               color: rank == 1
                   ? AppTheme.primaryNeon.withAlpha(40)
-                  : Colors.white.withAlpha(10),
+                  : borderBgColor,
               width: 1.0,
             ),
           ),
@@ -274,7 +291,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                         ? AppTheme.secondaryNeon.withAlpha(55)
                         : rank == 3
                             ? AppTheme.accentNeon.withAlpha(55)
-                            : Colors.white.withAlpha(15),
+                            : nonPodiumBg,
                 shape: BoxShape.circle,
               ),
               child: Text(
@@ -288,8 +305,8 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
             ),
             title: Text(
               prefix + entry.key,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: textColor,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),
@@ -313,10 +330,21 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // title: Text(
+        //   'ME PROFILE',
+        //   style: GoogleFonts.outfit(
+        //     color: Colors.white,
+        //     fontWeight: FontWeight.bold,
+        //     letterSpacing: 1.5,
+        //   ),
+        // ),
+        // backgroundColor: Colors.transparent,
+        // elevation: 0,
+        // centerTitle: true,
         title: Text(
           'ME PROFILE',
           style: GoogleFonts.outfit(
-            color: Colors.white,
+            color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppTheme.textPrimaryLight,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
           ),
@@ -324,6 +352,21 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return IconButton(
+                icon: Icon(
+                  themeProvider.isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                  color: themeProvider.isDarkMode ? Colors.white : AppTheme.textPrimaryLight,
+                ),
+                onPressed: () {
+                  themeProvider.toggleTheme();
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<Map<String, List<MapEntry<String, int>>>>(
         future: _calculateStats(),
@@ -335,6 +378,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
             return Center(child: Text('Error: ${snapshot.error}', style: const TextStyle(color: Colors.redAccent)));
           }
 
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           final stats = snapshot.data!;
           final niches = stats['niches']!;
           final tags = stats['tags']!;
@@ -351,20 +395,18 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
               padding: const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 100),
               children: [
                 // Top user card
-                Container(
+                GlassyContainer(
+                  borderRadius: 24,
                   padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppTheme.cardBg,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.white.withAlpha(15)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryNeon.withAlpha(20),
-                        blurRadius: 15,
-                        spreadRadius: 1,
-                      )
-                    ],
-                  ),
+                  color: AppTheme.cardBg,
+                  borderColor: AppTheme.border,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryNeon.withOpacity(isDark ? 0.15 : 0.08),
+                      blurRadius: 15,
+                      spreadRadius: 1,
+                    )
+                  ],
                   child: Row(
                     children: [
                       Container(
@@ -392,7 +434,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                             Text(
                               'Anonymous Viewer',
                               style: GoogleFonts.outfit(
-                                color: Colors.white,
+                                color: isDark ? Colors.white : AppTheme.textPrimaryLight,
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -400,7 +442,7 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                             const SizedBox(height: 4),
                             Text(
                               'Total watched sessions: $totalWatches',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppTheme.textSecondary,
                                 fontSize: 13,
                               ),

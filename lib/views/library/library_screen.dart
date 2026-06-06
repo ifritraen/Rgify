@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../models/gif_info.dart';
 import '../widgets/video_card.dart';
 import '../widgets/bulk_action_bar.dart';
+import '../widgets/glassy_container.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -27,20 +28,24 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
 
   void _showCreateCategoryDialog(BuildContext context, LibraryProvider provider) {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final hintColor = isDark ? Colors.white38 : AppTheme.textSecondary.withOpacity(0.6);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppTheme.background,
-          title: const Text('New Favorite Category', style: TextStyle(color: Colors.white)),
+          title: Text('New Favorite Category', style: TextStyle(color: textColor)),
           content: TextField(
             controller: controller,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: textColor),
             decoration: InputDecoration(
               hintText: 'Enter category name...',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: hintColor),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white.withAlpha(50)),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: AppTheme.primaryNeon),
@@ -50,7 +55,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -76,20 +81,24 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
 
   void _showCreatePlaylistDialog(BuildContext context) {
     final controller = TextEditingController();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+    final hintColor = isDark ? Colors.white38 : AppTheme.textSecondary.withOpacity(0.6);
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           backgroundColor: AppTheme.background,
-          title: const Text('New Playlist', style: TextStyle(color: Colors.white)),
+          title: Text('New Playlist', style: TextStyle(color: textColor)),
           content: TextField(
             controller: controller,
-            style: const TextStyle(color: Colors.white),
+            style: TextStyle(color: textColor),
             decoration: InputDecoration(
               hintText: 'Enter playlist name...',
-              hintStyle: const TextStyle(color: Colors.white38),
+              hintStyle: TextStyle(color: hintColor),
               enabledBorder: UnderlineInputBorder(
-                borderSide: BorderSide(color: Colors.white.withAlpha(50)),
+                borderSide: BorderSide(color: AppTheme.border),
               ),
               focusedBorder: const UnderlineInputBorder(
                 borderSide: BorderSide(color: AppTheme.primaryNeon),
@@ -99,7 +108,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
             ),
             TextButton(
               onPressed: () {
@@ -125,15 +134,15 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.textPrimary)),
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_upload_outlined, color: Colors.white),
+            icon: Icon(Icons.file_upload_outlined, color: AppTheme.textPrimary),
             tooltip: 'Import Backup',
             onPressed: () => provider.triggerImport(context),
           ),
           IconButton(
-            icon: const Icon(Icons.file_download_outlined, color: Colors.white),
+            icon: Icon(Icons.file_download_outlined, color: AppTheme.textPrimary),
             tooltip: 'Export Backup',
             onPressed: () => provider.triggerExport(context),
           ),
@@ -145,19 +154,18 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withAlpha(80),
+                  color: AppTheme.glassBg,
                   border: Border(
-                    bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1.0),
+                    bottom: BorderSide(color: AppTheme.border, width: 1.0),
                   ),
                 ),
                 child: TabBar(
                   controller: _tabController,
-                  // indicatorColor: AppTheme.primaryNeon,
                   indicator: const UnderlineTabIndicator(
                     borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
                     insets: EdgeInsets.symmetric(horizontal: 24),
                   ),
-                  labelColor: Colors.white,
+                  labelColor: AppTheme.textPrimary,
                   unselectedLabelColor: AppTheme.textSecondary,
                   labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
                   unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
@@ -179,6 +187,10 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           Builder(
             builder: (context) {
               final List<GifInfo> filteredFavorites;
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+              final subtitleColor = isDark ? Colors.white70 : AppTheme.textSecondary;
+
               if (_selectedFavoriteCategory == 'All') {
                 filteredFavorites = provider.favorites;
               } else {
@@ -211,8 +223,14 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                             },
                             backgroundColor: AppTheme.cardBg,
                             selectedColor: AppTheme.primaryNeon,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(
+                                color: _selectedFavoriteCategory == 'All' ? AppTheme.primaryNeon : AppTheme.borderLight,
+                              ),
+                            ),
                             labelStyle: TextStyle(
-                              color: _selectedFavoriteCategory == 'All' ? Colors.black : Colors.white,
+                              color: _selectedFavoriteCategory == 'All' ? Colors.white : AppTheme.textSecondary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -228,12 +246,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                                   context: context,
                                   builder: (context) => AlertDialog(
                                     backgroundColor: AppTheme.background,
-                                    title: Text('Delete Category "$cat"?'),
-                                    content: const Text('This will delete the category but keep your favorites.', style: TextStyle(color: Colors.white70)),
+                                    title: Text('Delete Category "$cat"?', style: TextStyle(color: textColor)),
+                                    content: Text('This will delete the category but keep your favorites.', style: TextStyle(color: subtitleColor)),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
-                                        child: const Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+                                        child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
                                       ),
                                       TextButton(
                                         onPressed: () {
@@ -263,8 +281,14 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                                 },
                                 backgroundColor: AppTheme.cardBg,
                                 selectedColor: AppTheme.primaryNeon,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                  side: BorderSide(
+                                    color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight,
+                                  ),
+                                ),
                                 labelStyle: TextStyle(
-                                  color: isSelected ? Colors.black : Colors.white,
+                                  color: isSelected ? Colors.white : AppTheme.textSecondary,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -278,6 +302,10 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                             label: const Text('+ Add Category'),
                             onPressed: () => _showCreateCategoryDialog(context, provider),
                             backgroundColor: AppTheme.cardBg,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: AppTheme.borderLight),
+                            ),
                             labelStyle: const TextStyle(
                               color: AppTheme.primaryNeon,
                               fontWeight: FontWeight.bold,
@@ -295,7 +323,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                               _selectedFavoriteCategory == 'All'
                                   ? 'No favorites added yet.'
                                   : 'No items in this category.',
-                              style: TextStyle(color: Colors.white.withAlpha(100)),
+                              style: TextStyle(color: AppTheme.textSecondary),
                             ),
                           )
                         : GridView.builder(
@@ -332,7 +360,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                   children: [
                     Text(
                       'Your Playlists (${provider.playlists.length})',
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -354,22 +382,18 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                     ? Center(
                         child: Text(
                           'No playlists created yet.',
-                          style: TextStyle(color: Colors.white.withAlpha(100)),
+                          style: TextStyle(color: AppTheme.textSecondary),
                         ),
                       )
                     : ListView.builder(
-                        // padding: const EdgeInsets.symmetric(horizontal: 16),
                         padding: const EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 84),
                         itemCount: provider.playlists.length,
                         itemBuilder: (context, index) {
                           final playlist = provider.playlists[index];
-                          return Card(
+                          return GlassyContainer(
                             color: AppTheme.cardBg,
+                            borderColor: AppTheme.border,
                             margin: const EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: BorderSide(color: Colors.white.withAlpha(15)),
-                            ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               leading: Container(
@@ -383,11 +407,11 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                               ),
                               title: Text(
                                 playlist.name,
-                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
                               ),
                               subtitle: Text(
                                 '${playlist.items.length} items',
-                                style: TextStyle(color: Colors.white.withAlpha(120)),
+                                style: TextStyle(color: AppTheme.textSecondary),
                               ),
                               trailing: IconButton(
                                 icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -414,7 +438,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               ? Center(
                   child: Text(
                     'No local history recorded.',
-                    style: TextStyle(color: Colors.white.withAlpha(100)),
+                    style: TextStyle(color: AppTheme.textSecondary),
                   ),
                 )
               : Column(
@@ -426,7 +450,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                         children: [
                           Text(
                             'Recently Viewed (${provider.history.length})',
-                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(color: AppTheme.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           TextButton.icon(
                             style: TextButton.styleFrom(
@@ -441,7 +465,6 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                     ),
                     Expanded(
                       child: GridView.builder(
-                        // padding: const EdgeInsets.symmetric(horizontal: 16),
                         padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
@@ -477,9 +500,10 @@ class PlaylistDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(playlist.name),
+        title: Text(playlist.name, style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: AppTheme.textPrimary),
       ),
       body: Stack(
         children: [
@@ -487,7 +511,7 @@ class PlaylistDetailScreen extends StatelessWidget {
               ? Center(
                   child: Text(
                     'This playlist is empty.',
-                    style: TextStyle(color: Colors.white.withAlpha(100)),
+                    style: TextStyle(color: AppTheme.textSecondary),
                   ),
                 )
               : GridView.builder(
