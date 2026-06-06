@@ -41,7 +41,7 @@ class FeedProvider with ChangeNotifier {
   }
 
   // Load subsequent pages (for infinite scroll)
-  Future<void> fetchNextPage() async {
+  Future<void> fetchNextPage({bool bypassCache = false}) async {
     if (_isLoading || !_hasMore) return;
 
     _isLoading = true;
@@ -49,7 +49,11 @@ class FeedProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _apiClient.getTrendingFeed(page: _currentPage, order: _activeOrder);
+      final data = await _apiClient.getTrendingFeed(
+        page: _currentPage,
+        order: _activeOrder,
+        bypassCache: bypassCache,
+      );
       final rawGifs = data['gifs'] as List? ?? [];
       
       final newGifs = rawGifs.map((g) => GifInfo.fromJson(g)).toList();
@@ -74,6 +78,6 @@ class FeedProvider with ChangeNotifier {
     _currentPage = 1;
     _hasMore = true;
     _errorMessage = null;
-    await fetchNextPage();
+    await fetchNextPage(bypassCache: true);
   }
 }

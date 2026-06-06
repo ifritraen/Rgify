@@ -25,6 +25,17 @@ class GifUrls {
       sd: json['sd'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'silent': silent,
+      'html': html,
+      'poster': poster,
+      'thumbnail': thumbnail,
+      'hd': hd,
+      'sd': sd,
+    };
+  }
 }
 
 class GifInfo {
@@ -65,5 +76,20 @@ class GifInfo {
       userName: json['userName'] ?? '',
       verified: json['verified'] ?? false,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'duration': duration,
+      'width': width,
+      'height': height,
+      'views': views,
+      'likes': likes,
+      'tags': tags,
+      'urls': urls.toJson(),
+      'userName': userName,
+      'verified': verified,
+    };
   }
 }

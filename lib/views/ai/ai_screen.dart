@@ -78,7 +78,7 @@ class _AIScreenState extends State<AIScreen> {
                     const SizedBox(height: 6),
                     const Text(
                       'Browse top AI generated virtual model animations and art streams.',
-                      style: TextStyle(color: Colors.whiteb8, fontSize: 12),
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
                 ),

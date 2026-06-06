@@ -27,6 +27,9 @@ class _ViewerScreenState extends State<ViewerScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<LibraryProvider>(context, listen: false).addToHistory(widget.gif);
+    });
     // Resolve direct media file endpoint (HD preferred, falling back to SD)
     final mediaUrl = widget.gif.urls.hd.isNotEmpty ? widget.gif.urls.hd : widget.gif.urls.sd;
     _controller = VideoPlayerController.networkUrl(Uri.parse(mediaUrl))

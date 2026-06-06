@@ -1,7 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/gif_info.dart';
+import '../services/isar_service.dart';
+import '../models/isar_schemas.dart';
 
 class Playlist {
   final String id;
@@ -51,70 +56,42 @@ class Playlist {
 }
 
 class LibraryProvider with ChangeNotifier {
-  final _storage = const FlutterSecureStorage();
-  
-  static const String _favoritesKey = 'rgify_favorites_list';
-  static const String _playlistsKey = 'rgify_playlists_list';
+  final IsarService _isarService = IsarService();
 
   List<GifInfo> _favorites = [];
   List<Playlist> _playlists = [];
+  List<GifInfo> _history = [];
   bool _isInitialized = false;
 
   List<GifInfo> get favorites => _favorites;
   List<Playlist> get playlists => _playlists;
+  List<GifInfo> get history => _history;
   bool get isInitialized => _isInitialized;
 
   LibraryProvider() {
     loadLibrary();
   }
 
-  // Load favorites and playlists from local storage
+  // Load favorites, playlists and history from Isar
   Future<void> loadLibrary() async {
     try {
-      final favsJson = await _storage.read(key: _favoritesKey);
-      if (favsJson != null) {
-        final List decoded = jsonDecode(favsJson);
-        _favorites = decoded.map((g) => GifInfo.fromJson(g)).toList();
+      _favorites = await _isarService.getFavorites();
+
+      final rawPlaylists = await _isarService.getPlaylists();
+      _playlists = [];
+      for (var rp in rawPlaylists) {
+        await rp.items.load();
+        _playlists.add(Playlist(
+          id: rp.playlistId,
+          name: rp.name,
+          items: rp.items.map((item) => _isarService.mapIsarToGif(item)).toList(),
+        ));
       }
 
-      final playlistsJson = await _storage.read(key: _playlistsKey);
-      if (playlistsJson != null) {
-        final List decoded = jsonDecode(playlistsJson);
-        _playlists = decoded.map((p) => Playlist.fromJson(p)).toList();
-      }
+      _history = await _isarService.getHistory();
     } catch (_) {}
     _isInitialized = true;
     notifyListeners();
-  }
-
-  // Save favorites to storage
-  Future<void> _saveFavorites() async {
-    final encoded = _favorites.map((i) => {
-      'id': i.id,
-      'duration': i.duration,
-      'width': i.width,
-      'height': i.height,
-      'views': i.views,
-      'likes': i.likes,
-      'tags': i.tags,
-      'urls': {
-        'silent': i.urls.silent,
-        'html': i.urls.html,
-        'poster': i.urls.poster,
-        'thumbnail': i.urls.thumbnail,
-        'hd': i.urls.hd,
-        'sd': i.urls.sd,
-      },
-      'userName': i.userName,
-      'verified': i.verified,
-    }).toList();
-    await _storage.write(key: _favoritesKey, value: jsonEncode(encoded));
-  }
-
-  // Save playlists to storage
-  Future<void> _savePlaylists() async {
-    final encoded = _playlists.map((p) => p.toJson()).toList();
-    await _storage.write(key: _playlistsKey, value: jsonEncode(encoded));
   }
 
   // Check if a Gif is favorited
@@ -124,52 +101,167 @@ class LibraryProvider with ChangeNotifier {
 
   // Toggle Favorite status
   Future<void> toggleFavorite(GifInfo gif) async {
-    final index = _favorites.indexWhere((g) => g.id == gif.id);
-    if (index >= 0) {
-      _favorites.removeAt(index);
-    } else {
-      _favorites.add(gif);
-    }
-    notifyListeners();
-    await _saveFavorites();
+    await _isarService.toggleFavorite(gif);
+    await loadLibrary();
   }
 
   // Create a new playlist
   Future<void> createPlaylist(String name) async {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final newPlaylist = Playlist(id: id, name: name, items: []);
-    _playlists.add(newPlaylist);
-    notifyListeners();
-    await _savePlaylists();
+    await _isarService.createPlaylist(name);
+    await loadLibrary();
   }
 
   // Add Gif to Playlist
   Future<void> addToPlaylist(String playlistId, GifInfo gif) async {
-    final index = _playlists.indexWhere((p) => p.id == playlistId);
-    if (index >= 0) {
-      // Avoid duplicate adds
-      if (!_playlists[index].items.any((g) => g.id == gif.id)) {
-        _playlists[index].items.add(gif);
-        notifyListeners();
-        await _savePlaylists();
-      }
-    }
+    await _isarService.addToPlaylist(playlistId, gif);
+    await loadLibrary();
   }
 
   // Remove Gif from Playlist
   Future<void> removeFromPlaylist(String playlistId, String gifId) async {
-    final index = _playlists.indexWhere((p) => p.id == playlistId);
-    if (index >= 0) {
-      _playlists[index].items.removeWhere((g) => g.id == gifId);
-      notifyListeners();
-      await _savePlaylists();
-    }
+    await _isarService.removeFromPlaylist(playlistId, gifId);
+    await loadLibrary();
   }
 
   // Delete an entire playlist
   Future<void> deletePlaylist(String playlistId) async {
-    _playlists.removeWhere((p) => p.id == playlistId);
-    notifyListeners();
-    await _savePlaylists();
+    await _isarService.deletePlaylist(playlistId);
+    await loadLibrary();
+  }
+
+  // History operations
+  Future<void> addToHistory(GifInfo gif) async {
+    await _isarService.addToHistory(gif);
+    await loadLibrary();
+  }
+
+  Future<void> clearHistory() async {
+    await _isarService.clearHistory();
+    await loadLibrary();
+  }
+
+  // --- Import / Export ---
+  Future<String> exportBackup() async {
+    final Map<String, dynamic> backup = {
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'favorites': _favorites.map((i) => i.toJson()).toList(),
+      'playlists': _playlists.map((p) => p.toJson()).toList(),
+      'history': _history.map((h) => h.toJson()).toList(),
+    };
+    return jsonEncode(backup);
+  }
+
+  // Trigger export UI flow
+  Future<void> triggerExport(BuildContext context) async {
+    try {
+      final jsonStr = await exportBackup();
+      final tempDir = await getTemporaryDirectory();
+      final backupFile = File('${tempDir.path}/rgify_backup.json');
+      await backupFile.writeAsString(jsonStr);
+
+      await Share.shareXFiles(
+        [XFile(backupFile.path)],
+        subject: 'Rgify Local Backup',
+        text: 'Rgify offline backup containing playlists and favorites.',
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to export backup: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    }
+  }
+
+  // Trigger import UI flow
+  Future<void> triggerImport(BuildContext context) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result == null || result.files.single.path == null) return;
+
+      final file = File(result.files.single.path!);
+      final jsonStr = await file.readAsString();
+      final data = jsonDecode(jsonStr) as Map<String, dynamic>;
+
+      if (data['version'] == null) {
+        throw const FormatException('Invalid backup file format');
+      }
+
+      final isar = await _isarService.db;
+      await isar.writeTxn(() async {
+        // Clear existing library data
+        await isar.isarGifInfos.clear();
+        await isar.isarPlaylists.clear();
+        await isar.isarHistoryItems.clear();
+
+        // Restore favorites
+        final rawFavs = data['favorites'] as List? ?? [];
+        for (var raw in rawFavs) {
+          final gif = GifInfo.fromJson(raw);
+          final isarGif = _isarService.mapGifToIsar(gif, isFavorite: true);
+          await isar.isarGifInfos.put(isarGif);
+        }
+
+        // Restore playlists
+        final rawPlaylists = data['playlists'] as List? ?? [];
+        for (var rawP in rawPlaylists) {
+          final p = Playlist.fromJson(rawP);
+          final isarP = IsarPlaylist()
+            ..playlistId = p.id
+            ..name = p.name;
+          await isar.isarPlaylists.put(isarP);
+
+          for (var item in p.items) {
+            final isarGif = _isarService.mapGifToIsar(item);
+            var existing = await isar.isarGifInfos.get(isarGif.fastHash);
+            if (existing == null) {
+              await isar.isarGifInfos.put(isarGif);
+              existing = isarGif;
+            }
+            isarP.items.add(existing);
+          }
+          await isarP.items.save();
+        }
+
+        // Restore history
+        final rawHistory = data['history'] as List? ?? [];
+        for (var rawH in rawHistory) {
+          final gif = GifInfo.fromJson(rawH);
+          final isarGif = _isarService.mapGifToIsar(gif);
+          var existing = await isar.isarGifInfos.get(isarGif.fastHash);
+          if (existing == null) {
+            await isar.isarGifInfos.put(isarGif);
+            existing = isarGif;
+          }
+
+          final h = IsarHistoryItem()
+            ..gifId = gif.id
+            ..viewedAt = DateTime.now();
+          h.gifInfo.value = existing;
+          await isar.isarHistoryItems.put(h);
+          await h.gifInfo.save();
+        }
+      });
+
+      // Reload
+      await loadLibrary();
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Backup imported successfully!'), backgroundColor: Colors.green),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to import backup: $e'), backgroundColor: Colors.redAccent),
+        );
+      }
+    }
   }
 }

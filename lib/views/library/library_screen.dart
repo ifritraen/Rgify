@@ -17,7 +17,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -74,17 +74,35 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     final provider = Provider.of<LibraryProvider>(context);
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(48),
-        child: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primaryNeon,
-          labelColor: Colors.white,
-          unselectedLabelColor: AppTheme.textSecondary,
-          tabs: const [
-            Tab(text: 'Favorites'),
-            Tab(text: 'Playlists'),
-          ],
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.file_upload_outlined, color: Colors.white),
+            tooltip: 'Import Backup',
+            onPressed: () => provider.triggerImport(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.file_download_outlined, color: Colors.white),
+            tooltip: 'Export Backup',
+            onPressed: () => provider.triggerExport(context),
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: AppTheme.primaryNeon,
+            labelColor: Colors.white,
+            unselectedLabelColor: AppTheme.textSecondary,
+            tabs: const [
+              Tab(text: 'Favorites'),
+              Tab(text: 'Playlists'),
+              Tab(text: 'History'),
+            ],
+          ),
         ),
       ),
       body: TabBarView(
@@ -197,6 +215,54 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               ),
             ],
           ),
+
+          // History Tab
+          provider.history.isEmpty
+              ? Center(
+                  child: Text(
+                    'No local history recorded.',
+                    style: TextStyle(color: Colors.white.withAlpha(100)),
+                  ),
+                )
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Recently Viewed (${provider.history.length})',
+                            style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                          ),
+                          TextButton.icon(
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.redAccent,
+                            ),
+                            onPressed: () => provider.clearHistory(),
+                            icon: const Icon(Icons.clear_all, size: 18),
+                            label: const Text('Clear History'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 0,
+                          childAspectRatio: 0.70,
+                        ),
+                        itemCount: provider.history.length,
+                        itemBuilder: (context, index) {
+                          return VideoCard(gif: provider.history[index]);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
         ],
       ),
     );

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/constants.dart';
 import 'token_manager.dart';
+import 'isar_service.dart';
 
 class ApiClient {
   final TokenManager _tokenManager = TokenManager();
+  final IsarService _isarService = IsarService();
 
   // Make authenticated GET requests with automatic token refreshing
   Future<http.Response> get(String url) async {
@@ -34,12 +36,21 @@ class ApiClient {
     return response;
   }
 
-  // Fetch search results
-  Future<Map<String, dynamic>> searchGifs(String query, {int limit = 20, int page = 1}) async {
+  // Fetch search results (cache for short periods e.g. 5 minutes)
+  Future<Map<String, dynamic>> searchGifs(String query, {int limit = 20, int page = 1, bool bypassCache = false}) async {
+    final cacheKey = 'search_${query}_page_${page}_limit_${limit}';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(minutes: 5));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     final url = '${ApiConstants.searchEndpoint}?search_text=${Uri.encodeComponent(query)}&limit=$limit&page=$page';
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to query search: ${response.statusCode}');
@@ -47,23 +58,41 @@ class ApiClient {
   }
 
   // Fetch trending/popular/recent GIFs feed
-  Future<Map<String, dynamic>> getTrendingFeed({int limit = 20, int page = 1, String order = 'trending'}) async {
+  Future<Map<String, dynamic>> getTrendingFeed({int limit = 20, int page = 1, String order = 'trending', bool bypassCache = false}) async {
+    final cacheKey = 'feed_${order}_page_${page}_limit_${limit}';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(minutes: 10));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     final url = '${ApiConstants.trendingGifsEndpoint}?limit=$limit&page=$page&order=$order';
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load feed ($order): ${response.statusCode}');
     }
   }
 
-  // Fetch all Niches list
-  Future<Map<String, dynamic>> getNiches() async {
+  // Fetch all Niches list (cache longer e.g. 12 hours)
+  Future<Map<String, dynamic>> getNiches({bool bypassCache = false}) async {
+    final cacheKey = 'niches_list';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(hours: 12));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     const url = ApiConstants.nichesEndpoint;
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to fetch niches list: ${response.statusCode}');
@@ -71,11 +100,20 @@ class ApiClient {
   }
 
   // Fetch Gifs for a specific niche
-  Future<Map<String, dynamic>> getNicheGifs(String nicheId, {int limit = 20, int page = 1, String order = 'trending'}) async {
+  Future<Map<String, dynamic>> getNicheGifs(String nicheId, {int limit = 20, int page = 1, String order = 'trending', bool bypassCache = false}) async {
+    final cacheKey = 'niche_${nicheId}_${order}_page_${page}_limit_${limit}';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(minutes: 10));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     final url = '${ApiConstants.nichesEndpoint}/$nicheId/gifs?limit=$limit&page=$page&order=$order';
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load niche gifs: ${response.statusCode}');
@@ -83,22 +121,41 @@ class ApiClient {
   }
 
   // Fetch trending tags list
-  Future<List<dynamic>> getTrendingTags() async {
+  Future<List<dynamic>> getTrendingTags({bool bypassCache = false}) async {
+    final cacheKey = 'trending_tags';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(hours: 2));
+      if (cached != null) {
+        return jsonDecode(cached) as List<dynamic>;
+      }
+    }
+
     const url = ApiConstants.trendingTagsEndpoint;
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as List<dynamic>;
     } else {
       throw Exception('Failed to load trending tags: ${response.statusCode}');
     }
   }
+
   // Fetch user profile metadata
-  Future<Map<String, dynamic>> getUserProfile(String username) async {
+  Future<Map<String, dynamic>> getUserProfile(String username, {bool bypassCache = false}) async {
+    final cacheKey = 'user_profile_${username}';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(hours: 4));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     final url = '${ApiConstants.usersEndpoint}/$username';
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load user profile: ${response.statusCode}');
@@ -106,11 +163,20 @@ class ApiClient {
   }
 
   // Fetch GIFs uploaded by a specific user (creator feed)
-  Future<Map<String, dynamic>> getUserGifs(String username, {int limit = 20, int page = 1}) async {
+  Future<Map<String, dynamic>> getUserGifs(String username, {int limit = 20, int page = 1, bool bypassCache = false}) async {
+    final cacheKey = 'user_gifs_${username}_page_${page}_limit_${limit}';
+    if (!bypassCache) {
+      final cached = await _isarService.readCache(cacheKey, maxAge: const Duration(minutes: 10));
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+    }
+
     final url = '${ApiConstants.usersEndpoint}/$username/search?limit=$limit&page=$page';
     final response = await get(url);
 
     if (response.statusCode == 200) {
+      await _isarService.writeCache(cacheKey, response.body);
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
       throw Exception('Failed to load user content: ${response.statusCode}');

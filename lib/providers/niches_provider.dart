@@ -76,7 +76,7 @@ class NichesProvider with ChangeNotifier {
   }
 
   // Load next page of selected niche gifs
-  Future<void> fetchNextNicheGifsPage() async {
+  Future<void> fetchNextNicheGifsPage({bool bypassCache = false}) async {
     if (_selectedNicheId == null || _isLoadingGifs || !_hasMoreGifs) return;
 
     _isLoadingGifs = true;
@@ -88,6 +88,7 @@ class NichesProvider with ChangeNotifier {
         _selectedNicheId!,
         page: _currentGifsPage,
         order: _activeOrder,
+        bypassCache: bypassCache,
       );
       final rawGifs = data['gifs'] as List? ?? [];
       final newGifs = rawGifs.map((g) => GifInfo.fromJson(g)).toList();
@@ -113,6 +114,6 @@ class NichesProvider with ChangeNotifier {
     _currentGifsPage = 1;
     _hasMoreGifs = true;
     _gifsError = null;
-    await fetchNextNicheGifsPage();
+    await fetchNextNicheGifsPage(bypassCache: true);
   }
 }
