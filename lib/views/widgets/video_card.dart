@@ -3,6 +3,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../models/gif_info.dart';
 import '../../config/theme.dart';
 import '../player/viewer_screen.dart';
+import '../creator/creator_profile_screen.dart';
 
 class VideoCard extends StatelessWidget {
   final GifInfo gif;
@@ -69,22 +70,32 @@ class VideoCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '@${gif.userName}',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white.withAlpha(229),
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreatorProfileScreen(username: gif.userName),
                           ),
-                        ),
-                        if (gif.verified)
-                          const Icon(Icons.verified, size: 14, color: AppTheme.accentNeon),
-                      ],
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '@${gif.userName}',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withAlpha(229),
+                                  ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (gif.verified)
+                            const Icon(Icons.verified, size: 14, color: AppTheme.accentNeon),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 6),
                     // Video duration tag

@@ -93,4 +93,27 @@ class ApiClient {
       throw Exception('Failed to load trending tags: ${response.statusCode}');
     }
   }
+  // Fetch user profile metadata
+  Future<Map<String, dynamic>> getUserProfile(String username) async {
+    final url = '${ApiConstants.usersEndpoint}/$username';
+    final response = await get(url);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load user profile: ${response.statusCode}');
+    }
+  }
+
+  // Fetch GIFs uploaded by a specific user (creator feed)
+  Future<Map<String, dynamic>> getUserGifs(String username, {int limit = 20, int page = 1}) async {
+    final url = '${ApiConstants.usersEndpoint}/$username/search?limit=$limit&page=$page';
+    final response = await get(url);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load user content: ${response.statusCode}');
+    }
+  }
 }

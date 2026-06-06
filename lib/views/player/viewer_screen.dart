@@ -6,6 +6,7 @@ import '../../config/theme.dart';
 import 'package:provider/provider.dart';
 import '../../providers/library_provider.dart';
 import '../widgets/playlist_selector_sheet.dart';
+import '../creator/creator_profile_screen.dart';
 
 class ViewerScreen extends StatefulWidget {
   final GifInfo gif;
@@ -114,20 +115,30 @@ class _ViewerScreenState extends State<ViewerScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Text(
-                      '@${widget.gif.userName}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreatorProfileScreen(username: widget.gif.userName),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    if (widget.gif.verified)
-                      const Icon(Icons.verified, size: 16, color: AppTheme.accentNeon),
-                  ],
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        '@${widget.gif.userName}',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (widget.gif.verified)
+                        const Icon(Icons.verified, size: 16, color: AppTheme.accentNeon),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 8),
                 // Tags

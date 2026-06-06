@@ -6,6 +6,7 @@ class ApiConstants {
   static const String nichesEndpoint = '$baseUrl/niches';
   static const String tagsEndpoint = '$baseUrl/tags';
   static const String trendingTagsEndpoint = '$baseUrl/tags/trending';
+  static const String usersEndpoint = '$baseUrl/users';
   
   // Custom headers to bypass simple bot checks
   static const Map<String, String> baseHeaders = {
