@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
     AppTheme.isDark = themeProvider.isDarkMode;
 
     return MaterialApp(
-      title: 'Rgify',
+      title: 'RedGify',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
