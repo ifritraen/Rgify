@@ -1,29 +1,29 @@
 ---
 description: Build the active project, commit changes, push to origin, and release it to GitHub under the user's identity.
 ---
-When the user executes `/up` or starts their request with `/up`:
+Before executing any steps, look up and read credentials from the universal sensitive storage at `C:\Users\akhla\.gemini\.agents\sensitive.md` if available.
+If a credential is not defined in `sensitive.md`, check the resolved fallback profiles below.
 
 1. **Parse Credentials & Actions**:
    Inspect the user's prompt or instruction to determine the selected credential and whether repository creation is requested:
    - **`akhlak` profile**:
-     - Username: `akhlakurrahman1011`
-     - Token/Password: `redPro002`
-     - Email: `akhlakurrahman1011@gmail.com`
+     - Username: `{{AKHLAK_USERNAME}}`
+     - Token/Password: `{{AKHLAK_TOKEN}}`
+     - Email: `{{AKHLAK_EMAIL}}`
    - **`ifrit` profile** (Default if not specified):
-     - Username: `ifritraen`
-     - Token/Password: `YOUR_GITHUB_TOKEN`
-     - Email: `ifrit.raen@gmail.com`
+     - Username: `{{IFRIT_USERNAME}}`
+     - Token/Password: `{{IFRIT_TOKEN}}`
+     - Email: `{{IFRIT_EMAIL}}`
    - **`create` command**:
      - If "create" is in the command, create a new GitHub repository for this project first.
 
 2. **Configure Git & GitHub CLI Credentials**:
    Run the following commands using the resolved profile credentials:
    ```powershell
-   # Example for Akhlak profile:
-   git config user.name "akhlakurrahman1011"
-   git config user.email "akhlakurrahman1011@gmail.com"
-   $env:GITHUB_TOKEN="redPro002"
-   echo "redPro002" | gh auth login --with-token
+   git config user.name "<USERNAME>"
+   git config user.email "<EMAIL>"
+   $env:GITHUB_TOKEN="<TOKEN>"
+   echo "<TOKEN>" | gh auth login --with-token
    ```
 
 3. **Repository Creation (Optional)**:
