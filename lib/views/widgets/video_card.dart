@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 import '../../models/gif_info.dart';
 import '../../config/theme.dart';
+import '../../providers/feed_provider.dart';
 import '../player/viewer_screen.dart';
 import '../creator/creator_profile_screen.dart';
 
@@ -29,13 +31,16 @@ class VideoCard extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => ViewerScreen(gif: gif),
               ),
             );
+            if (context.mounted) {
+              Provider.of<FeedProvider>(context, listen: false).filterWatchedGifs();
+            }
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

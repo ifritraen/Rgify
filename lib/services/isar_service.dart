@@ -213,6 +213,12 @@ class IsarService {
     });
   }
 
+  Future<Set<String>> getWatchedGifIds() async {
+    final isar = await db;
+    final items = await isar.isarHistoryItems.where().findAll();
+    return items.map((item) => item.gifId).toSet();
+  }
+
   // --- Caching Layer for API Response Rates reduction ---
   Future<String?> readCache(String key, {Duration maxAge = const Duration(minutes: 10)}) async {
     try {

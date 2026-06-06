@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/gif_info.dart';
 import '../services/api_client.dart';
+import '../services/isar_service.dart';
 
 class FeedProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -55,13 +56,16 @@ class FeedProvider with ChangeNotifier {
         bypassCache: bypassCache,
       );
       final rawGifs = data['gifs'] as List? ?? [];
-      
       final newGifs = rawGifs.map((g) => GifInfo.fromJson(g)).toList();
+      
+      // Filter out watched GIFs
+      final watchedIds = await IsarService().getWatchedGifIds();
+      final filteredGifs = newGifs.where((g) => !watchedIds.contains(g.id)).toList();
       
       if (newGifs.isEmpty) {
         _hasMore = false;
       } else {
-        _gifs.addAll(newGifs);
+        _gifs.addAll(filteredGifs);
         _currentPage++;
       }
     } catch (e) {
@@ -70,6 +74,18 @@ class FeedProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // Remove watched gifs dynamically from the current feed view
+  Future<void> filterWatchedGifs() async {
+    try {
+      final watchedIds = await IsarService().getWatchedGifIds();
+      final originalLength = _gifs.length;
+      _gifs.removeWhere((g) => watchedIds.contains(g.id));
+      if (_gifs.length != originalLength) {
+        notifyListeners();
+      }
+    } catch (_) {}
   }
 
   // Refresh feed from page 1
