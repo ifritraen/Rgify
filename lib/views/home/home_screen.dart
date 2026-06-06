@@ -60,6 +60,34 @@ class _HomeScreenState extends State<HomeScreen> {
     Provider.of<SearchProvider>(context, listen: false).clearSearch();
   }
 
+  Widget _buildSortChip(FeedProvider feed, String orderValue, String label) {
+    final isSelected = feed.activeOrder == orderValue;
+    return ChoiceChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : AppTheme.textSecondary,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontSize: 12,
+        ),
+      ),
+      selected: isSelected,
+      selectedColor: AppTheme.primaryNeon,
+      backgroundColor: AppTheme.cardBg,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(
+          color: isSelected ? AppTheme.primaryNeon : Colors.white.withAlpha(15),
+        ),
+      ),
+      onSelected: (selected) {
+        if (selected) {
+          feed.setOrder(orderValue);
+        }
+      },
+    );
+  }
+
   Widget _buildHomeFeedBody(FeedProvider feed, SearchProvider search) {
     final isSearching = search.currentQuery.isNotEmpty;
     final List gifs = isSearching ? search.searchResults : feed.gifs;
@@ -99,6 +127,24 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+
+        // Sorting/Stream Tabs selector (only visible when not searching)
+        if (!isSearching)
+          Container(
+            height: 36,
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                _buildSortChip(feed, 'trending', '🔥 Trending'),
+                const SizedBox(width: 8),
+                _buildSortChip(feed, 'new', '⚡ Newest'),
+                const SizedBox(width: 8),
+                _buildSortChip(feed, 'top', '⭐ Best / Popular'),
+              ],
+            ),
+          ),
         
         // Main dynamic feed content
         Expanded(

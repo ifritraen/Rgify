@@ -10,11 +10,13 @@ class FeedProvider with ChangeNotifier {
   int _currentPage = 1;
   bool _hasMore = true;
   String? _errorMessage;
+  String _activeOrder = 'trending'; // Can be 'trending', 'new', 'top'
 
   List<GifInfo> get gifs => _gifs;
   bool get isLoading => _isLoading;
   bool get hasMore => _hasMore;
   String? get errorMessage => _errorMessage;
+  String get activeOrder => _activeOrder;
 
   // Load initial feed
   Future<void> fetchInitialFeed() async {
@@ -23,6 +25,18 @@ class FeedProvider with ChangeNotifier {
     _gifs.clear();
     _hasMore = true;
     _errorMessage = null;
+    await fetchNextPage();
+  }
+
+  // Set new feed ordering order and refetch
+  Future<void> setOrder(String order) async {
+    if (_activeOrder == order) return;
+    _activeOrder = order;
+    _gifs.clear();
+    _currentPage = 1;
+    _hasMore = true;
+    _errorMessage = null;
+    notifyListeners();
     await fetchNextPage();
   }
 
@@ -35,7 +49,7 @@ class FeedProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _apiClient.getTrendingFeed(page: _currentPage);
+      final data = await _apiClient.getTrendingFeed(page: _currentPage, order: _activeOrder);
       final rawGifs = data['gifs'] as List? ?? [];
       
       final newGifs = rawGifs.map((g) => GifInfo.fromJson(g)).toList();

@@ -46,15 +46,15 @@ class ApiClient {
     }
   }
 
-  // Fetch trending/popular GIFs feed
-  Future<Map<String, dynamic>> getTrendingFeed({int limit = 20, int page = 1}) async {
-    final url = '${ApiConstants.trendingGifsEndpoint}?limit=$limit&page=$page';
+  // Fetch trending/popular/recent GIFs feed
+  Future<Map<String, dynamic>> getTrendingFeed({int limit = 20, int page = 1, String order = 'trending'}) async {
+    final url = '${ApiConstants.trendingGifsEndpoint}?limit=$limit&page=$page&order=$order';
     final response = await get(url);
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body) as Map<String, dynamic>;
     } else {
-      throw Exception('Failed to load trending feed: ${response.statusCode}');
+      throw Exception('Failed to load feed ($order): ${response.statusCode}');
     }
   }
 
