@@ -3,6 +3,10 @@ import 'package:video_player/video_player.dart';
 import '../../models/gif_info.dart';
 import '../../config/theme.dart';
 
+import 'package:provider/provider.dart';
+import '../../providers/library_provider.dart';
+import '../widgets/playlist_selector_sheet.dart';
+
 class ViewerScreen extends StatefulWidget {
   final GifInfo gif;
 
@@ -50,8 +54,20 @@ class _ViewerScreenState extends State<ViewerScreen> {
     });
   }
 
+  void _showPlaylistSelector(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => PlaylistSelectorSheet(gif: widget.gif),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final libraryProvider = Provider.of<LibraryProvider>(context);
+    final isFav = libraryProvider.isFavorited(widget.gif.id);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -144,10 +160,22 @@ class _ViewerScreenState extends State<ViewerScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _InteractionButton(
-                  icon: Icons.favorite,
-                  label: '${widget.gif.likes}',
-                  color: AppTheme.primaryNeon,
+                GestureDetector(
+                  onTap: () => libraryProvider.toggleFavorite(widget.gif),
+                  child: _InteractionButton(
+                    icon: isFav ? Icons.favorite : Icons.favorite_border,
+                    label: '${widget.gif.likes}',
+                    color: isFav ? AppTheme.primaryNeon : Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () => _showPlaylistSelector(context),
+                  child: const _InteractionButton(
+                    icon: Icons.playlist_add,
+                    label: 'Save',
+                    color: Colors.white,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _InteractionButton(

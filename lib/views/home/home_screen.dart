@@ -6,6 +6,7 @@ import '../../config/theme.dart';
 import '../widgets/video_card.dart';
 import '../widgets/sidebar.dart';
 import '../niches/niches_screen.dart';
+import '../library/library_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -178,7 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_currentBottomNavIndex == 1) {
       activeBody = const NichesScreen();
     } else if (_currentBottomNavIndex == 2) {
-      activeBody = Center(child: Text('Bookmarks Library (Coming soon)', style: TextStyle(color: Colors.white.withAlpha(191))));
+      activeBody = const LibraryScreen();
     } else if (_currentBottomNavIndex == 3) {
       activeBody = Center(child: Text('Me Profile (Coming soon)', style: TextStyle(color: Colors.white.withAlpha(191))));
     } else {
