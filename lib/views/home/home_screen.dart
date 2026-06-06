@@ -10,6 +10,7 @@ import '../widgets/video_card.dart';
 import '../explore/explore_screen.dart';
 import '../library/library_screen.dart';
 import '../ai/ai_screen.dart';
+import '../profile/me_profile_screen.dart';
 import '../widgets/bulk_action_bar.dart';
 import '../../providers/selection_provider.dart';
 
@@ -102,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Column(
       children: [
-        // Elegant Search Bar
+        // Elegant Search Bar (Commented out - now in bottom bar search button)
+        /*
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: TextField(
@@ -133,6 +135,57 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+        */
+
+        if (isSearching)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.cardBg,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.white.withAlpha(20)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search, color: AppTheme.primaryNeon, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: RichText(
+                          text: TextSpan(
+                            text: 'Search results for ',
+                            style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+                            children: [
+                              TextSpan(
+                                text: '"${search.currentQuery}"',
+                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _clearSearch,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.white10,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, color: Colors.white70, size: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         // Sorting/Stream Tabs selector (only visible when not searching)
         if (!isSearching)
@@ -243,7 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
       activeBody = const SafeArea(child: AIScreen());
     } else if (_currentBottomNavIndex == 4) {
       // activeBody = Center(child: Text('Me Profile (Coming soon)', style: TextStyle(color: Colors.white.withAlpha(191))));
-      activeBody = SafeArea(child: Center(child: Text('Me Profile (Coming soon)', style: TextStyle(color: Colors.white.withAlpha(191)))));
+      // activeBody = SafeArea(child: Center(child: Text('Me Profile (Coming soon)', style: TextStyle(color: Colors.white.withAlpha(191)))));
+      activeBody = const MeProfileScreen();
     } else {
       // activeBody = _buildHomeFeedBody(feed, search);
       activeBody = SafeArea(child: _buildHomeFeedBody(feed, search));
@@ -331,6 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
                         _buildNavItem(1, Icons.explore_outlined, Icons.explore, 'Explore'),
+                        _buildNavItem(-1, Icons.search_outlined, Icons.search, 'Search', onTapOverride: _showSearchBottomSheet),
                         _buildNavItem(2, Icons.bookmark_outline, Icons.bookmark, 'Library'),
                         _buildNavItem(3, Icons.psychology_outlined, Icons.psychology, 'AI Gen'),
                         _buildNavItem(4, Icons.person_outline, Icons.person, 'Me'),
@@ -346,18 +401,124 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData outlineIcon, IconData filledIcon, String label) {
-    final isSelected = _currentBottomNavIndex == index;
+  void _showSearchBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) {
+        final localSearchController = TextEditingController(text: _searchController.text);
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
+            ),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(200),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(24),
+                    topRight: Radius.circular(24),
+                  ),
+                  border: Border.all(color: Colors.white.withAlpha(20)),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white24,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: localSearchController,
+                      style: const TextStyle(color: Colors.white),
+                      autofocus: true,
+                      decoration: InputDecoration(
+                        hintText: 'Search Gifs & Niches...',
+                        hintStyle: const TextStyle(color: Colors.white38),
+                        prefixIcon: const Icon(Icons.search, color: AppTheme.primaryNeon),
+                        filled: true,
+                        fillColor: Colors.white.withAlpha(10),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide(color: Colors.white.withAlpha(20)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(color: AppTheme.primaryNeon),
+                        ),
+                      ),
+                      onSubmitted: (query) {
+                        Navigator.pop(context);
+                        if (query.trim().isNotEmpty) {
+                          _searchController.text = query;
+                          _onSearchSubmit(query);
+                          setState(() {
+                            _currentBottomNavIndex = 0; // Switch to Home tab to show results
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                          if (localSearchController.text.trim().isNotEmpty) {
+                            _searchController.text = localSearchController.text;
+                            _onSearchSubmit(localSearchController.text);
+                            setState(() {
+                              _currentBottomNavIndex = 0; // Switch to Home tab to show results
+                            });
+                          }
+                        },
+                        child: const Text(
+                          'Search',
+                          style: TextStyle(color: AppTheme.primaryNeon, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildNavItem(int index, IconData outlineIcon, IconData filledIcon, String label, {VoidCallback? onTapOverride}) {
+    // If tap override is set, it is never selected based on the current page index
+    final isSelected = onTapOverride == null && _currentBottomNavIndex == index;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
         Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
-        setState(() {
-          _currentBottomNavIndex = index;
-        });
+        if (onTapOverride != null) {
+          onTapOverride();
+        } else {
+          setState(() {
+            _currentBottomNavIndex = index;
+          });
+        }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

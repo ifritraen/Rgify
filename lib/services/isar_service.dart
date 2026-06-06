@@ -175,12 +175,22 @@ class IsarService {
       // Check if this gif is already in history, if so update timestamp, otherwise insert
       var historyItem = await isar.isarHistoryItems.filter().gifIdEqualTo(gif.id).findFirst();
       if (historyItem != null) {
+        // historyItem.viewedAt = DateTime.now();
+        // await isar.isarHistoryItems.put(historyItem);
         historyItem.viewedAt = DateTime.now();
+        historyItem.watchCount = historyItem.watchCount + 1;
         await isar.isarHistoryItems.put(historyItem);
       } else {
+        // final newHistory = IsarHistoryItem()
+        //   ..gifId = gif.id
+        //   ..viewedAt = DateTime.now();
+        // newHistory.gifInfo.value = existingGif;
+        // await isar.isarHistoryItems.put(newHistory);
+        // await newHistory.gifInfo.save();
         final newHistory = IsarHistoryItem()
           ..gifId = gif.id
-          ..viewedAt = DateTime.now();
+          ..viewedAt = DateTime.now()
+          ..watchCount = 1;
         newHistory.gifInfo.value = existingGif;
         await isar.isarHistoryItems.put(newHistory);
         await newHistory.gifInfo.save();
@@ -204,6 +214,15 @@ class IsarService {
       }
     }
     return list;
+  }
+
+  Future<List<IsarHistoryItem>> getRawHistory() async {
+    final isar = await db;
+    final items = await isar.isarHistoryItems.where().sortByViewedAtDesc().findAll();
+    for (var item in items) {
+      await item.gifInfo.load();
+    }
+    return items;
   }
 
   Future<void> clearHistory() async {

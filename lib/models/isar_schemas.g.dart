@@ -2575,6 +2575,11 @@ const IsarHistoryItemSchema = CollectionSchema(
       id: 1,
       name: r'viewedAt',
       type: IsarType.dateTime,
+    ),
+    r'watchCount': PropertySchema(
+      id: 2,
+      name: r'watchCount',
+      type: IsarType.long,
     )
   },
   estimateSize: _isarHistoryItemEstimateSize,
@@ -2630,6 +2635,7 @@ void _isarHistoryItemSerialize(
 ) {
   writer.writeString(offsets[0], object.gifId);
   writer.writeDateTime(offsets[1], object.viewedAt);
+  writer.writeLong(offsets[2], object.watchCount);
 }
 
 IsarHistoryItem _isarHistoryItemDeserialize(
@@ -2642,6 +2648,7 @@ IsarHistoryItem _isarHistoryItemDeserialize(
   object.gifId = reader.readString(offsets[0]);
   object.id = id;
   object.viewedAt = reader.readDateTime(offsets[1]);
+  object.watchCount = reader.readLong(offsets[2]);
   return object;
 }
 
@@ -2656,6 +2663,8 @@ P _isarHistoryItemDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 1:
       return (reader.readDateTime(offset)) as P;
+    case 2:
+      return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -3105,6 +3114,62 @@ extension IsarHistoryItemQueryFilter
       ));
     });
   }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterFilterCondition>
+      watchCountEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'watchCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterFilterCondition>
+      watchCountGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'watchCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterFilterCondition>
+      watchCountLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'watchCount',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterFilterCondition>
+      watchCountBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'watchCount',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
 }
 
 extension IsarHistoryItemQueryObject
@@ -3155,6 +3220,20 @@ extension IsarHistoryItemQuerySortBy
       return query.addSortBy(r'viewedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterSortBy>
+      sortByWatchCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'watchCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterSortBy>
+      sortByWatchCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'watchCount', Sort.desc);
+    });
+  }
 }
 
 extension IsarHistoryItemQuerySortThenBy
@@ -3197,6 +3276,20 @@ extension IsarHistoryItemQuerySortThenBy
       return query.addSortBy(r'viewedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterSortBy>
+      thenByWatchCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'watchCount', Sort.asc);
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QAfterSortBy>
+      thenByWatchCountDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'watchCount', Sort.desc);
+    });
+  }
 }
 
 extension IsarHistoryItemQueryWhereDistinct
@@ -3212,6 +3305,13 @@ extension IsarHistoryItemQueryWhereDistinct
       distinctByViewedAt() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'viewedAt');
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, IsarHistoryItem, QDistinct>
+      distinctByWatchCount() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'watchCount');
     });
   }
 }
@@ -3233,6 +3333,12 @@ extension IsarHistoryItemQueryProperty
   QueryBuilder<IsarHistoryItem, DateTime, QQueryOperations> viewedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'viewedAt');
+    });
+  }
+
+  QueryBuilder<IsarHistoryItem, int, QQueryOperations> watchCountProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'watchCount');
     });
   }
 }

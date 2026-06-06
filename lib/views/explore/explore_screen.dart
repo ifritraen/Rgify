@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/explore_provider.dart';
 import '../../providers/selection_provider.dart';
 import '../../providers/search_provider.dart';
@@ -168,22 +170,44 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
         toolbarHeight: 0, // No main App bar text to save space
         backgroundColor: Colors.transparent,
         elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppTheme.primaryNeon,
-          labelColor: Colors.white,
-          unselectedLabelColor: AppTheme.textSecondary,
-          isScrollable: true,
-          tabs: const [
-            Tab(text: 'Gif'),
-            Tab(text: 'Images'),
-            Tab(text: 'Creator'),
-            Tab(text: 'Niche'),
-            Tab(text: 'Tags'),
-          ],
-          onTap: (index) {
-            Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
-          },
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(40),
+          child: ClipRRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(80),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1.0),
+                  ),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  // indicatorColor: AppTheme.primaryNeon,
+                  indicator: const UnderlineTabIndicator(
+                    borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
+                    insets: EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: AppTheme.textSecondary,
+                  labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
+                  isScrollable: true,
+                  tabs: const [
+                    Tab(text: 'Gif'),
+                    Tab(text: 'Images'),
+                    Tab(text: 'Creator'),
+                    Tab(text: 'Niche'),
+                    Tab(text: 'Tags'),
+                  ],
+                  onTap: (index) {
+                    Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
+                  },
+                ),
+              ),
+            ),
+          ),
         ),
       ),
       body: Stack(

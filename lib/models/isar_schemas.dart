@@ -67,6 +67,8 @@ class IsarHistoryItem {
   
   // Link to the GIF model
   final gifInfo = IsarLink<IsarGifInfo>();
+
+  int watchCount = 1;
 }
 
 @collection

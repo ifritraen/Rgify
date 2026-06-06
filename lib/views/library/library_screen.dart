@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../providers/library_provider.dart';
 import '../../config/theme.dart';
 import '../../models/gif_info.dart';
@@ -137,17 +139,36 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: TabBar(
-            controller: _tabController,
-            indicatorColor: AppTheme.primaryNeon,
-            labelColor: Colors.white,
-            unselectedLabelColor: AppTheme.textSecondary,
-            tabs: const [
-              Tab(text: 'Favorites'),
-              Tab(text: 'Playlists'),
-              Tab(text: 'History'),
-            ],
+          preferredSize: const Size.fromHeight(40),
+          child: ClipRRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withAlpha(80),
+                  border: Border(
+                    bottom: BorderSide(color: Colors.white.withAlpha(15), width: 1.0),
+                  ),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  // indicatorColor: AppTheme.primaryNeon,
+                  indicator: const UnderlineTabIndicator(
+                    borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
+                    insets: EdgeInsets.symmetric(horizontal: 24),
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: AppTheme.textSecondary,
+                  labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
+                  unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
+                  tabs: const [
+                    Tab(text: 'Favorites'),
+                    Tab(text: 'Playlists'),
+                    Tab(text: 'History'),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ),
