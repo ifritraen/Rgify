@@ -157,6 +157,19 @@ class PlaybackSettingsSheet extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 16),
+              const Divider(color: Colors.white10),
+              const SizedBox(height: 8),
+              Center(
+                child: Text(
+                  'RedGify v1.0.0',
+                  style: TextStyle(
+                    color: subtitleColor.withOpacity(0.6),
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
             ],
           ),
         ),

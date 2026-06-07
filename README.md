@@ -29,6 +29,8 @@ Here is a visual overview of RedGify's clean, minimalist layout and features:
   * **Double Tap**: Toggles play/pause state instantly with a glowing fade animation.
 * **Custom Neon Controls**: Compact control bar featuring custom-drawn vector icons (hot pink heart for favoriting, violet playlist adder, cyan downloader, and node share icon) wrapped in glassmorphic borders.
 * **Glassmorphic bottom seekbar**: Fluid scrubbing bar with real-time video preview.
+* **Persistent Configuration & Bedtime Sleeper**: Loop count limiters, Autoplay Next toggles, sleep-on-loop mode, and global pointer inactivity detection (auto-closes the app after 10 minutes of idle state).
+* **Device Screen Wakelock**: Integrated native device screen wakelock (`wakelock_plus`) that keeps the screen awake automatically during active video playback.
 
 ### 2. Tabbed Explore & Search Hub
 * **Unified Explore Hub**: Includes 5 tabbed sections wrapped in a glassmorphic blurred header:
@@ -41,12 +43,15 @@ Here is a visual overview of RedGify's clean, minimalist layout and features:
   * *Gif, Images, & Creators*: Sort by **Trending**, **Top of Week**, **Top of Month**, and **Latest**.
   * *Niche*: Sort by **Hot**, **Latest**, and **Top**.
 * **Glassmorphic Search Dialog**: A floating header and search button in the bottom navigation bar trigger a frosted bottom sheet that slides up, autofocuses, and directs submissions to the home feed.
+* **A-Z Navigation**: Tags tab dynamically groups all trending tags alphabetically with quick-scroll selector buttons.
 
-### 3. Personal Analytics & "Me" Profile
+### 3. Personal Analytics, Subscriptions & "Me" Profile
 * **Aggregate Statistics Engine**: Analyzes your local offline watch history database in real-time.
 * **Ranked Top Listings**: Computes and displays your **Top 10 Niches**, **Top 10 Tags**, and **Top 10 Creators** by view counts.
 * **Interactive Navigation**: Tap any entry in your stats to instantly view tag results, creator profiles, or pre-filter niches in the Explore screen.
 * **Detail Sheets**: Click "See All" on any category to open sliding frosted glass detail sheets showing complete aggregated lists.
+* **Subscribed Creators Relocation**: Displays your subscribed creators list directly under the Top Creators section on the Me Profile screen using a glassmorphic card grid.
+* **Profile Name Editor**: Customize your display name directly from the profile card, persisting locally via secure storage (defaults to "Hello, Human").
 
 ### 4. Playlists, Favorites, & Categories
 * **Local Playlists**: Create, rename, delete, and manage custom playlists persisted locally.
@@ -62,15 +67,21 @@ Here is a visual overview of RedGify's clean, minimalist layout and features:
 
 ### 6. Downloader Manager & File Transfer
 * **Download Service**: High-speed chunk-based streaming to download MP4 files.
-* **Live Progress Feedback**: Displays circular percentage indicators on active buttons and progress bars in the bulk action queue.
+* **Live Progress Feedback**: Displays circular percentage indicators on active cards and progress bars in the downloads tab queue.
 * **Public Directory Savings**: Configured to save media inside `/storage/emulated/0/Download/RedGify/` rather than internal sandbox storage for easy file sharing.
 * **Import & Export Backups**: Backup playlists, favorites, custom categories, and watch history to a versioned JSON file and share/restore via `file_picker`.
 
-### 7. Performance & Offline Engine
+### 7. Local Files Browser
+* **Folders Browser**: Scans specific device directories for local video files with Breadcrumb navigation support.
+* **Local Player Queue**: Integrates with the Reels player to play folders of local files directly.
+
+### 8. Performance & Offline Engine
+* **Video Caching**: Preloads next video queue files in the background. Uses local copies on duplicate downloads instantly to avoid redundant network streams.
 * **Isar NoSQL Database**: Ultra-fast local database caching with string-hashing schemas.
 * **Rate-Limit Safeguards**: Caches temporary JWT authentication tokens to prevent `429 Too Many Requests` API locks.
 * **Smart Cache Expiry**: Employs cache invalidation prefixes to selectively delete cached paginated streams when triggering a pull-to-refresh.
 * **Watched Exclusions**: Option to exclude watched media from feeds to guarantee a fresh, unseen queue on scroll.
+* **Scroll-Driven Header Visibility**: Fixed top bars, filters, and chips collapse smoothly on scroll down and expand on scroll up to maximize screen viewing space.
 
 ---
 

@@ -235,13 +235,12 @@ class _HomeScreenState extends State<HomeScreen> {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 height: isVisible ? 48 : 0,
-                child: isVisible
-                    ? const TabBar(
+                    ? TabBar(
                         indicatorColor: AppTheme.primaryNeon,
                         indicatorSize: TabBarIndicatorSize.label,
                         labelColor: Colors.white,
                         unselectedLabelColor: AppTheme.textSecondary,
-                        tabs: [
+                        tabs: const [
                           Tab(text: 'Feed'),
                           Tab(text: 'Trending'),
                         ],
