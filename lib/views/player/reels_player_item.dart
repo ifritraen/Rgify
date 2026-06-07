@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +8,7 @@ import '../../config/theme.dart';
 import '../../providers/library_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../providers/download_provider.dart';
+import '../../services/video_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import '../widgets/playlist_selector_sheet.dart';
 import '../widgets/neon_vector_buttons.dart';
@@ -33,8 +35,8 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
   // bool _isPlaying = false;
   // bool _showHud = true;
   bool _showHud = false;
-  bool _isDownloading = false;
-  double _downloadProgress = 0.0;
+  // bool _isDownloading = false;
+  // double _downloadProgress = 0.0;
 
   // Custom seeking / speed states
   Timer? _seekTimer;
@@ -85,8 +87,16 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
       });
       return;
     }
-    final mediaUrl = widget.gif.urls.hd.isNotEmpty ? widget.gif.urls.hd : widget.gif.urls.sd;
-    _controller = VideoPlayerController.networkUrl(Uri.parse(mediaUrl))
+    
+    if (VideoCacheManager.isCached(widget.gif.id)) {
+      final cachedPath = VideoCacheManager.getCachedPath(widget.gif.id)!;
+      _controller = VideoPlayerController.file(File(cachedPath));
+    } else {
+      final mediaUrl = widget.gif.urls.hd.isNotEmpty ? widget.gif.urls.hd : widget.gif.urls.sd;
+      _controller = VideoPlayerController.networkUrl(Uri.parse(mediaUrl));
+    }
+
+    _controller!
       ..initialize().then((_) {
         if (!mounted) return;
         setState(() {

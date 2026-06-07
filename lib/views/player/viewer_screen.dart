@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/gif_info.dart';
+import '../../services/video_cache_manager.dart';
 import 'reels_player_item.dart';
 
 class ViewerScreen extends StatefulWidget {
@@ -25,6 +26,14 @@ class _ViewerScreenState extends State<ViewerScreen> {
     super.initState();
     _currentPageIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    
+    // Preload current and next videos on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      VideoCacheManager.preloadVideo(widget.gifs[widget.initialIndex]);
+      if (widget.initialIndex + 1 < widget.gifs.length) {
+        VideoCacheManager.preloadVideo(widget.gifs[widget.initialIndex + 1]);
+      }
+    });
   }
 
   @override
@@ -47,6 +56,11 @@ class _ViewerScreenState extends State<ViewerScreen> {
               setState(() {
                 _currentPageIndex = index;
               });
+              // Preload current and next videos
+              VideoCacheManager.preloadVideo(widget.gifs[index]);
+              if (index + 1 < widget.gifs.length) {
+                VideoCacheManager.preloadVideo(widget.gifs[index + 1]);
+              }
             },
             itemCount: widget.gifs.length,
             itemBuilder: (context, index) {

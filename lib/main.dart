@@ -10,10 +10,13 @@ import 'providers/selection_provider.dart';
 import 'providers/explore_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/download_provider.dart';
+import 'services/video_cache_manager.dart';
 import 'config/theme.dart';
 import 'views/home/home_screen.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  VideoCacheManager.clearCacheOnStartup();
   runApp(
     MultiProvider(
       providers: [

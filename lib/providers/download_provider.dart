@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/gif_info.dart';
 import '../services/download_service.dart';
+import '../services/video_cache_manager.dart';
 import '../views/widgets/glassy_toast.dart';
 
 class DownloadedItem {
@@ -81,16 +82,41 @@ class DownloadProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final downloadUrl = gif.urls.hd.isNotEmpty ? gif.urls.hd : gif.urls.sd;
-      final path = await DownloadService().downloadVideo(
-        downloadUrl,
-        gif.id,
-        creatorName: gif.userName,
-        onProgress: (progress) {
-          _activeDownloads[gif.id] = progress;
-          notifyListeners();
-        },
-      );
+      final String path;
+      if (VideoCacheManager.isCached(gif.id)) {
+        final cachedPath = VideoCacheManager.getCachedPath(gif.id)!;
+        final cachedFile = File(cachedPath);
+        
+        Directory? dir;
+        if (Platform.isAndroid) {
+          dir = Directory('/storage/emulated/0/Download/Rgify');
+        } else {
+          dir = await getDownloadsDirectory();
+        }
+        if (dir != null && !await dir.exists()) {
+          await dir.create(recursive: true);
+        }
+        dir ??= await getApplicationDocumentsDirectory();
+        
+        final filename = gif.userName.trim().isNotEmpty
+            ? '${gif.userName}_${gif.id}.mp4'
+            : 'rgify_${gif.id}.mp4';
+        path = '${dir.path}/$filename';
+        
+        // Copy the file instantly
+        await cachedFile.copy(path);
+      } else {
+        final downloadUrl = gif.urls.hd.isNotEmpty ? gif.urls.hd : gif.urls.sd;
+        path = await DownloadService().downloadVideo(
+          downloadUrl,
+          gif.id,
+          creatorName: gif.userName,
+          onProgress: (progress) {
+            _activeDownloads[gif.id] = progress;
+            notifyListeners();
+          },
+        );
+      }
 
       _activeDownloads.remove(gif.id);
       
