@@ -7,6 +7,7 @@ import '../../config/theme.dart';
 import '../../providers/library_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../providers/download_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../widgets/playlist_selector_sheet.dart';
 import '../widgets/neon_vector_buttons.dart';
 import '../creator/creator_profile_screen.dart';
@@ -522,13 +523,14 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                     size: 20,
                     label: 'Share',
                     onTap: () {
-                      // Custom copy link/share action
+                      final shareUrl = widget.gif.urls.html ?? 'https://www.redgifs.com/watch/${widget.gif.id}';
+                      Share.share(shareUrl);
                     },
                   ),
                 ],
               ),
             ),
-
+          
           // 7. Bottom scrubbable Seekbar
           if (_showHud && !_isImg)
             Positioned(
