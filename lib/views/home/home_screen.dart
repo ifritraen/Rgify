@@ -5,6 +5,8 @@ import '../../providers/feed_provider.dart';
 import '../../providers/search_provider.dart';
 import '../../providers/personalized_feed_provider.dart';
 import '../../providers/library_provider.dart';
+import '../../providers/playback_settings_provider.dart';
+import '../../providers/local_player_provider.dart';
 import '../../config/theme.dart';
 import '../../models/gif_info.dart';
 import '../widgets/video_card.dart';
@@ -186,13 +188,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   else ...[
                     SliverPadding(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                      // padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                      padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                       sliver: SliverGrid(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 0,
-                          childAspectRatio: 0.70,
+                          // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                          // crossAxisSpacing: 16,
+                          // mainAxisSpacing: 0,
+                          // childAspectRatio: 0.70,
+                          crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -236,14 +243,34 @@ class _HomeScreenState extends State<HomeScreen> {
                 duration: const Duration(milliseconds: 200),
                 height: isVisible ? 48 : 0,
                 child: isVisible
-                    ? TabBar(
-                        indicatorColor: AppTheme.primaryNeon,
-                        indicatorSize: TabBarIndicatorSize.label,
-                        labelColor: Colors.white,
-                        unselectedLabelColor: AppTheme.textSecondary,
-                        tabs: const [
-                          Tab(text: 'Feed'),
-                          Tab(text: 'Trending'),
+                    ? Row(
+                        children: [
+                          const Expanded(
+                            child: TabBar(
+                              indicatorColor: AppTheme.primaryNeon,
+                              indicatorSize: TabBarIndicatorSize.label,
+                              labelColor: Colors.white,
+                              unselectedLabelColor: AppTheme.textSecondary,
+                              tabs: [
+                                Tab(text: 'Feed'),
+                                Tab(text: 'Trending'),
+                              ],
+                            ),
+                          ),
+                          Consumer<PlaybackSettingsProvider>(
+                            builder: (context, settings, child) {
+                              final isOneCol = settings.gridColumns == 1;
+                              return IconButton(
+                                icon: Icon(
+                                  isOneCol ? Icons.grid_view : Icons.view_stream,
+                                  color: AppTheme.textPrimary,
+                                  size: 20,
+                                ),
+                                tooltip: isOneCol ? 'Switch to 2 columns' : 'Switch to 1 column',
+                                onPressed: () => settings.toggleGridColumns(),
+                              );
+                            },
+                          ),
                         ],
                       )
                     : const SizedBox.shrink(),
@@ -287,6 +314,15 @@ class _HomeScreenState extends State<HomeScreen> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
+
+        // If on Local Folder tab (index 2) and inside a subfolder, navigate up to parent folder
+        if (_currentBottomNavIndex == 2) {
+          final localProvider = Provider.of<LocalPlayerProvider>(context, listen: false);
+          if (localProvider.canNavigateBack) {
+            await localProvider.navigateBack();
+            return;
+          }
+        }
 
         // 1. If not on Home tab, go to Home tab first
         if (_currentBottomNavIndex != 0) {
@@ -787,13 +823,18 @@ class _PersonalizedFeedViewState extends State<PersonalizedFeedView> {
             )
           else ...[
             SliverPadding(
-              padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+              // padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+              padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
               sliver: SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 0,
-                  childAspectRatio: 0.70,
+                  // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                  // crossAxisSpacing: 16,
+                  // mainAxisSpacing: 0,
+                  // childAspectRatio: 0.70,
+                  crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                  crossAxisSpacing: 4,
+                  mainAxisSpacing: 4,
+                  childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                 ),
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -948,13 +989,18 @@ class _TrendingFeedViewState extends State<TrendingFeedView> {
                   )
                 else ...[
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                    // padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                    padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 0,
-                        childAspectRatio: 0.70,
+                        // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                        // crossAxisSpacing: 16,
+                        // mainAxisSpacing: 0,
+                        // childAspectRatio: 0.70,
+                        crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 4,
+                        childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {

@@ -41,7 +41,7 @@ class DownloadProvider extends ChangeNotifier {
   bool get isLoaded => _isLoaded;
 
   DownloadProvider() {
-    _loadCompletedDownloads();
+    loadCompletedDownloads();
   }
 
   bool isDownloading(String id) => _activeDownloads.containsKey(id);
@@ -52,8 +52,9 @@ class DownloadProvider extends ChangeNotifier {
     return File('${directory.path}/downloads.json');
   }
 
-  Future<void> _loadCompletedDownloads() async {
-    if (_isLoaded) return;
+  Future<void> loadCompletedDownloads({bool force = false}) async {
+    if (_isLoaded && !force) return;
+    if (force) _isLoaded = false;
     try {
       final file = await _localFile;
       if (await file.exists()) {

@@ -75,6 +75,13 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
   Timer? _volumeOverlayTimer;
   bool _showVolumeOverlay = false;
 
+  // Swipe to seek states
+  bool _isDraggingSeek = false;
+  Duration _dragStartPos = Duration.zero;
+  bool _showSeekOverlay = false;
+  Duration? _dragCurrentPos;
+  Timer? _seekOverlayTimer;
+
   @override
   void initState() {
     super.initState();
@@ -529,29 +536,68 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                 if (details.localPosition.dy < screenHeight / 2) {
                   _isDraggingVolume = true;
                   _dragStartVolume = _volume;
+                } else {
+                  _isDraggingSeek = true;
+                  if (_controller != null && _initialized) {
+                    _dragStartPos = _controller!.value.position;
+                    _dragCurrentPos = _dragStartPos;
+                  }
                 }
               },
               onHorizontalDragUpdate: (details) {
-                if (!_isDraggingVolume || _controller == null || !_initialized) return;
+                if (_controller == null || !_initialized) return;
                 final screenWidth = MediaQuery.of(context).size.width;
                 final delta = details.primaryDelta ?? 0;
-                final change = delta / (screenWidth * 0.5); // swipe half screen width for full 0 to 1 range
-                setState(() {
-                  _volume = (_volume + change).clamp(0.0, 1.0);
-                  _controller!.setVolume(_volume);
-                  _showVolumeOverlay = true;
-                });
-                _volumeOverlayTimer?.cancel();
-                _volumeOverlayTimer = Timer(const Duration(milliseconds: 800), () {
-                  if (mounted) {
-                    setState(() {
-                      _showVolumeOverlay = false;
-                    });
+
+                if (_isDraggingVolume) {
+                  final change = delta / (screenWidth * 0.5); // swipe half screen width for full 0 to 1 range
+                  setState(() {
+                    _volume = (_volume + change).clamp(0.0, 1.0);
+                    _controller!.setVolume(_volume);
+                    _showVolumeOverlay = true;
+                  });
+                  _volumeOverlayTimer?.cancel();
+                  _volumeOverlayTimer = Timer(const Duration(milliseconds: 800), () {
+                    if (mounted) {
+                      setState(() {
+                        _showVolumeOverlay = false;
+                      });
+                    }
+                  });
+                } else if (_isDraggingSeek) {
+                  final duration = _controller!.value.duration;
+                  // Swipe full screen width to seek 60 seconds (or duration if video is shorter)
+                  final maxSeekSec = duration.inSeconds > 60 ? 60.0 : duration.inSeconds.toDouble();
+                  final changeMs = (delta / screenWidth) * maxSeekSec * 1000;
+                  
+                  setState(() {
+                    if (_dragCurrentPos != null) {
+                      final newMs = _dragCurrentPos!.inMilliseconds + changeMs.toInt();
+                      _dragCurrentPos = Duration(
+                        milliseconds: newMs.clamp(0, duration.inMilliseconds),
+                      );
+                      _showSeekOverlay = true;
+                    }
+                  });
+
+                  _seekOverlayTimer?.cancel();
+                  if (_dragCurrentPos != null) {
+                    _controller!.seekTo(_dragCurrentPos!);
                   }
-                });
+                }
               },
               onHorizontalDragEnd: (details) {
                 _isDraggingVolume = false;
+                if (_isDraggingSeek) {
+                  _isDraggingSeek = false;
+                  _seekOverlayTimer = Timer(const Duration(milliseconds: 800), () {
+                    if (mounted) {
+                      setState(() {
+                        _showSeekOverlay = false;
+                      });
+                    }
+                  });
+                }
               },
               child: Center(
                 child: AspectRatio(
@@ -595,6 +641,10 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
           if (_showVolumeOverlay)
             Center(
               child: _buildVolumeIndicator(),
+            ),
+          if (_showSeekOverlay)
+            Center(
+              child: _buildSwipeSeekIndicator(),
             ),
 
           // 3. Double-tap Play/Pause Animation Overlay
@@ -658,15 +708,17 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        if (_controller != null) _controller!.pause();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CreatorProfileScreen(username: widget.gif.userName),
-                          ),
-                        );
-                      },
+                      onTap: (widget.gif.userName.isEmpty || widget.gif.userName.toLowerCase() == 'anonymous')
+                          ? null
+                          : () {
+                              if (_controller != null) _controller!.pause();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => CreatorProfileScreen(username: widget.gif.userName),
+                                ),
+                              );
+                            },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -688,7 +740,9 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                                 const Icon(Icons.verified, size: 14, color: AppTheme.accentNeon),
                                 const SizedBox(width: 6),
                               ],
-                              SubscribeButton(creatorId: widget.gif.userName),
+                              if (widget.gif.userName.isNotEmpty && widget.gif.userName.toLowerCase() != 'anonymous') ...[
+                                SubscribeButton(creatorId: widget.gif.userName),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 6),
@@ -1028,5 +1082,42 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
     final minutes = d.inMinutes.toString().padLeft(2, '0');
     final seconds = (d.inSeconds % 60).toString().padLeft(2, '0');
     return '$minutes:$seconds';
+  }
+
+  Widget _buildSwipeSeekIndicator() {
+    if (_dragCurrentPos == null || _controller == null) return const SizedBox.shrink();
+    final duration = _controller!.value.duration;
+    final progress = _dragCurrentPos!;
+    final isForward = progress >= _dragStartPos;
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.primaryNeon.withAlpha(100), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.primaryNeon.withAlpha(50),
+            blurRadius: 10,
+          )
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isForward ? Icons.fast_forward : Icons.fast_rewind,
+            color: AppTheme.primaryNeon,
+            size: 28,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${_formatDuration(progress)} / ${_formatDuration(duration)}',
+            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
   }
 }

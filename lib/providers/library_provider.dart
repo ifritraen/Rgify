@@ -8,6 +8,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/gif_info.dart';
 import '../services/isar_service.dart';
 import '../models/isar_schemas.dart';
+import 'playback_settings_provider.dart';
+import 'theme_provider.dart';
+import 'download_provider.dart';
 
 class Playlist {
   final String id;
@@ -232,13 +235,42 @@ class LibraryProvider with ChangeNotifier {
 
   // --- Import / Export ---
   Future<String> exportBackup() async {
+    final displayName = await _secureStorage.read(key: 'user_display_name');
+    final autoplayNext = await _secureStorage.read(key: 'play_autoplay_next');
+    final shuffleEnabled = await _secureStorage.read(key: 'play_shuffle_enabled');
+    final repeatSingle = await _secureStorage.read(key: 'play_repeat_single');
+    final repeatLimit = await _secureStorage.read(key: 'play_repeat_limit');
+    final playbackAction = await _secureStorage.read(key: 'play_playback_action');
+    final gridColumns = await _secureStorage.read(key: 'play_grid_columns');
+    final themeMode = await _secureStorage.read(key: 'theme_mode');
+
+    List<dynamic> downloadsData = [];
+    try {
+      final docsDir = await getApplicationDocumentsDirectory();
+      final downloadsFile = File('${docsDir.path}/downloads.json');
+      if (await downloadsFile.exists()) {
+        final content = await downloadsFile.readAsString();
+        downloadsData = jsonDecode(content) as List? ?? [];
+      }
+    } catch (_) {}
+
     final Map<String, dynamic> backup = {
-      'version': 1,
+      'version': 2,
       'exportedAt': DateTime.now().toIso8601String(),
       'favorites': _favorites.map((i) => i.toJson()).toList(),
       'playlists': _playlists.map((p) => p.toJson()).toList(),
       'history': _history.map((h) => h.toJson()).toList(),
       'favorite_categories': _favoriteCategoryMappings,
+      'subscribed_creators': _subscribedCreators,
+      'downloads': downloadsData,
+      'user_display_name': displayName,
+      'play_autoplay_next': autoplayNext,
+      'play_shuffle_enabled': shuffleEnabled,
+      'play_repeat_single': repeatSingle,
+      'play_repeat_limit': repeatLimit,
+      'play_playback_action': playbackAction,
+      'play_grid_columns': gridColumns,
+      'theme_mode': themeMode,
     };
     return jsonEncode(backup);
   }
@@ -248,13 +280,13 @@ class LibraryProvider with ChangeNotifier {
     try {
       final jsonStr = await exportBackup();
       final tempDir = await getTemporaryDirectory();
-      final backupFile = File('${tempDir.path}/rgify_backup.json');
+      final backupFile = File('${tempDir.path}/redgify_backup.json');
       await backupFile.writeAsString(jsonStr);
 
       await Share.shareXFiles(
         [XFile(backupFile.path)],
-        subject: 'Rgify Local Backup',
-        text: 'Rgify offline backup containing playlists and favorites.',
+        subject: 'RedGify Local Backup',
+        text: 'RedGify offline backup containing playlists, favorites, subscriptions, downloads, statistics, and settings.',
       );
     } catch (e) {
       if (context.mounted) {
@@ -337,18 +369,69 @@ class LibraryProvider with ChangeNotifier {
           await isar.isarHistoryItems.put(h);
           await h.gifInfo.save();
         }
-        // Restore favorite categories
-        final rawCats = data['favorite_categories'] as Map<String, dynamic>?;
-        if (rawCats != null) {
-          final mapped = rawCats.map((key, value) => MapEntry(key, List<String>.from(value)));
-          await _secureStorage.write(key: 'favorite_categories', value: jsonEncode(mapped));
-        } else {
-          await _secureStorage.delete(key: 'favorite_categories');
-        }
       });
 
-      // Reload
+      // Restore favorite categories
+      final rawCats = data['favorite_categories'] as Map<String, dynamic>?;
+      if (rawCats != null) {
+        final mapped = rawCats.map((key, value) => MapEntry(key, List<String>.from(value)));
+        await _secureStorage.write(key: 'favorite_categories', value: jsonEncode(mapped));
+      } else {
+        await _secureStorage.delete(key: 'favorite_categories');
+      }
+
+      // Restore subscribed creators
+      final rawSubs = data['subscribed_creators'] as List? ?? [];
+      final subList = rawSubs.map((v) => v.toString()).toList();
+      await _secureStorage.write(key: 'subscribed_creators', value: jsonEncode(subList));
+
+      // Restore user display name
+      final rawName = data['user_display_name'] as String?;
+      if (rawName != null) {
+        await _secureStorage.write(key: 'user_display_name', value: rawName);
+      } else {
+        await _secureStorage.delete(key: 'user_display_name');
+      }
+
+      // Restore settings
+      for (final key in [
+        'play_autoplay_next',
+        'play_shuffle_enabled',
+        'play_repeat_single',
+        'play_repeat_limit',
+        'play_playback_action',
+        'play_grid_columns',
+        'theme_mode',
+      ]) {
+        final val = data[key] as String?;
+        if (val != null) {
+          await _secureStorage.write(key: key, value: val);
+        } else {
+          await _secureStorage.delete(key: key);
+        }
+      }
+
+      // Restore downloads history file
+      final rawDownloads = data['downloads'] as List?;
+      if (rawDownloads != null) {
+        try {
+          final docsDir = await getApplicationDocumentsDirectory();
+          final downloadsFile = File('${docsDir.path}/downloads.json');
+          await downloadsFile.writeAsString(jsonEncode(rawDownloads));
+        } catch (_) {}
+      }
+
+      // Reload Library state
       await loadLibrary();
+
+      // Programmatically reload dependent settings providers
+      try {
+        if (context.mounted) {
+          Provider.of<PlaybackSettingsProvider>(context, listen: false).loadSettings();
+          Provider.of<ThemeProvider>(context, listen: false).loadTheme();
+          Provider.of<DownloadProvider>(context, listen: false).loadCompletedDownloads(force: true);
+        }
+      } catch (_) {}
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

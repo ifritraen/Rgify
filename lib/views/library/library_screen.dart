@@ -11,6 +11,7 @@ import '../widgets/glassy_container.dart';
 import '../../providers/download_provider.dart';
 import '../creator/creator_profile_screen.dart';
 import '../home/home_screen.dart';
+import '../../providers/playback_settings_provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -153,6 +154,19 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                                 children: [
                                   Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.textPrimary)),
                                   const Spacer(),
+                                  Consumer<PlaybackSettingsProvider>(
+                                    builder: (context, settings, child) {
+                                      final isOneCol = settings.gridColumns == 1;
+                                      return IconButton(
+                                        icon: Icon(
+                                          isOneCol ? Icons.grid_view : Icons.view_stream,
+                                          color: AppTheme.textPrimary,
+                                        ),
+                                        tooltip: isOneCol ? 'Switch to 2 columns' : 'Switch to 1 column',
+                                        onPressed: () => settings.toggleGridColumns(),
+                                      );
+                                    },
+                                  ),
                                   IconButton(
                                     icon: Icon(Icons.file_upload_outlined, color: AppTheme.textPrimary),
                                     tooltip: 'Import Backup',
@@ -358,13 +372,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                             ),
                           )
                         : GridView.builder(
-                            // padding: const EdgeInsets.all(16),
-                            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                            padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 0,
-                              childAspectRatio: 0.70,
+                              crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                              crossAxisSpacing: 4,
+                              mainAxisSpacing: 4,
+                              childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                             ),
                             itemCount: filteredFavorites.length,
                             itemBuilder: (context, index) {
@@ -496,12 +509,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                     ),
                     Expanded(
                       child: GridView.builder(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 84),
+                        padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 0,
-                          childAspectRatio: 0.70,
+                          crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                         ),
                         itemCount: provider.history.length,
                         itemBuilder: (context, index) {
@@ -629,12 +642,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                     ),
                     Expanded(
                       child: GridView.builder(
-                        padding: const EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 84),
+                        padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 0,
-                          childAspectRatio: 0.70,
+                          crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                          childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                         ),
                         itemCount: completed.length,
                         itemBuilder: (context, index) {
@@ -690,12 +703,12 @@ class PlaylistDetailScreen extends StatelessWidget {
                   ),
                 )
               : GridView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 0,
-                    childAspectRatio: 0.70,
+                    crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                    crossAxisSpacing: 4,
+                    mainAxisSpacing: 4,
+                    childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                   ),
                   itemCount: playlist.items.length,
                   itemBuilder: (context, index) {

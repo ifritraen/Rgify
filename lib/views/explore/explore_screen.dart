@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../providers/explore_provider.dart';
 import '../../providers/selection_provider.dart';
 import '../../providers/search_provider.dart';
+import '../../providers/playback_settings_provider.dart';
 import '../../config/theme.dart';
 import '../widgets/video_card.dart';
 import '../creator/creator_profile_screen.dart';
@@ -12,6 +13,7 @@ import '../player/tag_results_screen.dart';
 import '../widgets/bulk_action_bar.dart';
 import '../widgets/glassy_container.dart';
 import '../home/home_screen.dart';
+import '../widgets/subscribe_button.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -197,27 +199,47 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                                   bottom: BorderSide(color: AppTheme.border, width: 1.0),
                                 ),
                               ),
-                              child: TabBar(
-                                controller: _tabController,
-                                indicator: const UnderlineTabIndicator(
-                                  borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
-                                  insets: EdgeInsets.symmetric(horizontal: 16),
-                                ),
-                                labelColor: AppTheme.textPrimary,
-                                unselectedLabelColor: AppTheme.textSecondary,
-                                labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
-                                unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
-                                isScrollable: false,
-                                tabs: const [
-                                  Tab(text: 'Gif'),
-                                  Tab(text: 'Images'),
-                                  Tab(text: 'Creator'),
-                                  Tab(text: 'Niche'),
-                                  Tab(text: 'Tags'),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TabBar(
+                                      controller: _tabController,
+                                      indicator: const UnderlineTabIndicator(
+                                        borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
+                                        insets: EdgeInsets.symmetric(horizontal: 16),
+                                      ),
+                                      labelColor: AppTheme.textPrimary,
+                                      unselectedLabelColor: AppTheme.textSecondary,
+                                      labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
+                                      unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
+                                      isScrollable: false,
+                                      tabs: const [
+                                        Tab(text: 'Gif'),
+                                        Tab(text: 'Images'),
+                                        Tab(text: 'Creator'),
+                                        Tab(text: 'Niche'),
+                                        Tab(text: 'Tags'),
+                                      ],
+                                      onTap: (index) {
+                                        Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
+                                      },
+                                    ),
+                                  ),
+                                  Consumer<PlaybackSettingsProvider>(
+                                    builder: (context, settings, child) {
+                                      final isOneCol = settings.gridColumns == 1;
+                                      return IconButton(
+                                        icon: Icon(
+                                          isOneCol ? Icons.grid_view : Icons.view_stream,
+                                          color: AppTheme.textPrimary,
+                                          size: 20,
+                                        ),
+                                        tooltip: isOneCol ? 'Switch to 2 columns' : 'Switch to 1 column',
+                                        onPressed: () => settings.toggleGridColumns(),
+                                      );
+                                    },
+                                  ),
                                 ],
-                                onTap: (index) {
-                                  Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
-                                },
                               ),
                             ),
                           ),
@@ -275,13 +297,18 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                   )
                 else ...[
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    // padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 0,
-                        childAspectRatio: 0.70,
+                        // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                        // crossAxisSpacing: 16,
+                        // mainAxisSpacing: 0,
+                        // childAspectRatio: 0.70,
+                        crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 4,
+                        childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => VideoCard(
@@ -335,13 +362,18 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                   )
                 else ...[
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    // padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 0,
-                        childAspectRatio: 0.70,
+                        // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                        // crossAxisSpacing: 16,
+                        // mainAxisSpacing: 0,
+                        // childAspectRatio: 0.70,
+                        crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 4,
+                        childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => VideoCard(
@@ -447,6 +479,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                                   ),
                                 );
                               },
+                              trailing: SubscribeButton(creatorId: creator.username, compact: true),
                             ),
                           );
                         },
@@ -583,13 +616,18 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                   )
                 else ...[
                   SliverPadding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    // padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
+                    padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
                     sliver: SliverGrid(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 0,
-                        childAspectRatio: 0.70,
+                        // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                        // crossAxisSpacing: 16,
+                        // mainAxisSpacing: 0,
+                        // childAspectRatio: 0.70,
+                        crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                        crossAxisSpacing: 4,
+                        mainAxisSpacing: 4,
+                        childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
                       ),
                       delegate: SliverChildBuilderDelegate(
                         (context, index) => VideoCard(

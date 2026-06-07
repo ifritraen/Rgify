@@ -8,6 +8,7 @@ import '../../providers/local_player_provider.dart';
 import '../../models/gif_info.dart';
 import '../player/viewer_screen.dart';
 import '../widgets/glassy_container.dart';
+import '../../providers/playback_settings_provider.dart';
 
 class LocalPlayerScreen extends StatelessWidget {
   const LocalPlayerScreen({super.key});
@@ -78,6 +79,15 @@ class LocalPlayerScreen extends StatelessWidget {
               )
             : null,
         actions: [
+          IconButton(
+            icon: Icon(
+              Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? Icons.grid_view : Icons.view_stream,
+              color: AppTheme.textPrimary,
+            ),
+            onPressed: () {
+              Provider.of<PlaybackSettingsProvider>(context, listen: false).toggleGridColumns();
+            },
+          ),
           if (provider.rootPath != null)
             IconButton(
               icon: const Icon(Icons.folder_off, color: Colors.redAccent),
@@ -365,13 +375,18 @@ class LocalPlayerScreen extends StatelessWidget {
         // Video Files Grid Layout
         if (provider.videoFiles.isNotEmpty)
           SliverPadding(
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
+            // padding: const EdgeInsets.only(left: 16, right: 16, bottom: 100),
+            padding: const EdgeInsets.only(left: 4, right: 4, bottom: 100),
             sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.70,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                // crossAxisCount: 2,
+                // crossAxisSpacing: 16,
+                // mainAxisSpacing: 16,
+                // childAspectRatio: 0.70,
+                crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {

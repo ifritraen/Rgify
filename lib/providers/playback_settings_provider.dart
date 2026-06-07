@@ -15,24 +15,27 @@ class PlaybackSettingsProvider with ChangeNotifier {
   bool _repeatSingle = false;
   int _repeatLimit = 10;
   PlaybackAction _playbackAction = PlaybackAction.playOnceAndNext;
+  int _gridColumns = 2;
 
   bool get autoplayNext => _autoplayNext;
   bool get shuffleEnabled => _shuffleEnabled;
   bool get repeatSingle => _repeatSingle;
   int get repeatLimit => _repeatLimit;
   PlaybackAction get playbackAction => _playbackAction;
+  int get gridColumns => _gridColumns;
 
   PlaybackSettingsProvider() {
-    _loadSettings();
+    loadSettings();
   }
 
-  Future<void> _loadSettings() async {
+  Future<void> loadSettings() async {
     try {
       final autoplayStr = await _secureStorage.read(key: 'play_autoplay_next');
       final shuffleStr = await _secureStorage.read(key: 'play_shuffle_enabled');
       final repeatSingleStr = await _secureStorage.read(key: 'play_repeat_single');
       final limitStr = await _secureStorage.read(key: 'play_repeat_limit');
       final actionStr = await _secureStorage.read(key: 'play_playback_action');
+      final columnsStr = await _secureStorage.read(key: 'play_grid_columns');
 
       if (autoplayStr != null) _autoplayNext = autoplayStr == 'true';
       if (shuffleStr != null) _shuffleEnabled = shuffleStr == 'true';
@@ -42,6 +45,7 @@ class PlaybackSettingsProvider with ChangeNotifier {
         final index = int.tryParse(actionStr) ?? 0;
         _playbackAction = PlaybackAction.values[index.clamp(0, PlaybackAction.values.length - 1)];
       }
+      if (columnsStr != null) _gridColumns = int.tryParse(columnsStr) ?? 2;
       notifyListeners();
     } catch (_) {}
   }
@@ -83,6 +87,14 @@ class PlaybackSettingsProvider with ChangeNotifier {
     notifyListeners();
     try {
       await _secureStorage.write(key: 'play_playback_action', value: value.index.toString());
+    } catch (_) {}
+  }
+
+  Future<void> toggleGridColumns() async {
+    _gridColumns = _gridColumns == 2 ? 1 : 2;
+    notifyListeners();
+    try {
+      await _secureStorage.write(key: 'play_grid_columns', value: _gridColumns.toString());
     } catch (_) {}
   }
 }

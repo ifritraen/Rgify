@@ -73,7 +73,7 @@ class GifInfo {
       likes: json['likes'] ?? 0,
       tags: List<String>.from(json['tags'] ?? []),
       urls: GifUrls.fromJson(json['urls'] ?? {}),
-      userName: json['userName'] ?? '',
+      userName: json['userName'] ?? json['username'] ?? '',
       verified: json['verified'] ?? false,
     );
   }

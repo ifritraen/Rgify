@@ -9,6 +9,7 @@ import '../widgets/bulk_action_bar.dart';
 import '../widgets/glassy_container.dart';
 import '../creator/creator_profile_screen.dart';
 import '../player/tag_results_screen.dart';
+import '../../providers/playback_settings_provider.dart';
 
 class SearchResultsScreen extends StatefulWidget {
   final String query;
@@ -108,6 +109,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               fontSize: 20,
             ),
           ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? Icons.grid_view : Icons.view_stream,
+                color: textColor,
+              ),
+              onPressed: () {
+                Provider.of<PlaybackSettingsProvider>(context, listen: false).toggleGridColumns();
+              },
+            ),
+          ],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(48),
             child: ClipRRect(
@@ -307,12 +319,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.70,
+                // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                // crossAxisSpacing: 16,
+                // mainAxisSpacing: 16,
+                // childAspectRatio: 0.70,
+                crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
               ),
               itemCount: search.gifResults.take(4).length,
               itemBuilder: (context, index) {
@@ -339,12 +356,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              // padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.70,
+                // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                // crossAxisSpacing: 16,
+                // mainAxisSpacing: 16,
+                // childAspectRatio: 0.70,
+                crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
               ),
               itemCount: search.imageResults.take(4).length,
               itemBuilder: (context, index) {
@@ -386,13 +408,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            // padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.70,
+                // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                // crossAxisSpacing: 16,
+                // mainAxisSpacing: 16,
+                // childAspectRatio: 0.70,
+                crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
@@ -435,13 +462,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: [
           SliverPadding(
-            padding: const EdgeInsets.all(16),
+            // padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.only(left: 4, right: 4, top: 4, bottom: 84),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.70,
+                // crossAxisCount: MediaQuery.of(context).size.width > 600 ? 3 : 2,
+                // crossAxisSpacing: 16,
+                // mainAxisSpacing: 16,
+                // childAspectRatio: 0.70,
+                crossAxisCount: Provider.of<PlaybackSettingsProvider>(context).gridColumns,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                childAspectRatio: Provider.of<PlaybackSettingsProvider>(context).gridColumns == 1 ? 1.4 : 0.70,
               ),
               delegate: SliverChildBuilderDelegate(
                 (context, index) {

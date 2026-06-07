@@ -281,7 +281,8 @@ class _VideoCardState extends State<VideoCard> {
         : (isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.04));
 
     return GlassyContainer(
-      margin: const EdgeInsets.only(bottom: 16),
+      // margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.zero,
       color: AppTheme.cardBg,
       borderColor: cardBorderColor,
       borderWidth: isSelected ? 2.0 : 1.0,
@@ -392,7 +393,7 @@ class _VideoCardState extends State<VideoCard> {
                 left: 0,
                 right: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topCenter,
@@ -409,25 +410,28 @@ class _VideoCardState extends State<VideoCard> {
                       // Left side: Username + Verified status
                       Expanded(
                         child: GestureDetector(
-                          onTap: () {
-                            _cleanupPreview();
-                            if (selectionProvider.isSelectionMode) {
-                              selectionProvider.toggleSelection(widget.gif);
-                            } else {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => CreatorProfileScreen(username: widget.gif.userName),
-                                ),
-                              );
-                            }
-                          },
+                          onTap: (widget.gif.userName.isEmpty || widget.gif.userName.toLowerCase() == 'anonymous')
+                              ? null
+                              : () {
+                                  _cleanupPreview();
+                                  if (selectionProvider.isSelectionMode) {
+                                    selectionProvider.toggleSelection(widget.gif);
+                                  } else {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => CreatorProfileScreen(username: widget.gif.userName),
+                                      ),
+                                    );
+                                  }
+                                },
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
                                 child: Text(
-                                  '@${widget.gif.userName}',
+                                  // '@${widget.gif.userName}',
+                                  widget.gif.userName,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -437,18 +441,19 @@ class _VideoCardState extends State<VideoCard> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (widget.gif.verified) ...[
-                                const SizedBox(width: 2),
-                                const Icon(Icons.verified, size: 12, color: AppTheme.accentNeon),
+                              // if (widget.gif.verified) ...[
+                              //   const SizedBox(width: 2),
+                              //   const Icon(Icons.verified, size: 12, color: AppTheme.accentNeon),
+                              // ],
+                              if (widget.gif.userName.isNotEmpty && widget.gif.userName.toLowerCase() != 'anonymous') ...[
+                                const SizedBox(width: 1),
+                                SubscribeButton(creatorId: widget.gif.userName, compact: true),
                               ],
-                              const SizedBox(width: 4),
-                              // SubscribeButton(creatorId: widget.gif.userName),
-                              SubscribeButton(creatorId: widget.gif.userName, compact: true),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 2),
                       // Right side: Views and duration tag
                       Row(
                         mainAxisSize: MainAxisSize.min,

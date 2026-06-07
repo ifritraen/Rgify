@@ -9,10 +9,10 @@ class ThemeProvider with ChangeNotifier {
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 
   ThemeProvider() {
-    _loadTheme();
+    loadTheme();
   }
 
-  Future<void> _loadTheme() async {
+  Future<void> loadTheme() async {
     try {
       final modeStr = await _secureStorage.read(key: 'theme_mode');
       if (modeStr != null) {
