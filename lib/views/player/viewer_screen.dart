@@ -1,6 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/gif_info.dart';
 import '../../services/video_cache_manager.dart';
+import '../../providers/playback_settings_provider.dart';
 import 'reels_player_item.dart';
 
 class ViewerScreen extends StatefulWidget {
@@ -42,6 +45,27 @@ class _ViewerScreenState extends State<ViewerScreen> {
     super.dispose();
   }
 
+  void _handleVideoFinished() {
+    final settings = Provider.of<PlaybackSettingsProvider>(context, listen: false);
+    if (!settings.autoplayNext) return;
+
+    int nextIndex = _currentPageIndex + 1;
+    if (settings.shuffleEnabled && widget.gifs.length > 1) {
+      final rand = Random();
+      do {
+        nextIndex = rand.nextInt(widget.gifs.length);
+      } while (nextIndex == _currentPageIndex);
+    }
+
+    if (nextIndex < widget.gifs.length) {
+      _pageController.animateToPage(
+        nextIndex,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +91,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
               return ReelsPlayerItem(
                 gif: widget.gifs[index],
                 isActive: index == _currentPageIndex,
+                onVideoFinished: _handleVideoFinished,
               );
             },
           ),

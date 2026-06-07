@@ -10,9 +10,11 @@ import 'providers/selection_provider.dart';
 import 'providers/explore_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/download_provider.dart';
+import 'providers/playback_settings_provider.dart';
 import 'services/video_cache_manager.dart';
 import 'config/theme.dart';
 import 'views/home/home_screen.dart';
+import 'views/widgets/inactivity_monitor.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,6 +28,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => NichesProvider()),
         ChangeNotifierProvider(create: (_) => LibraryProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
+        ChangeNotifierProvider(create: (_) => PlaybackSettingsProvider()),
         // ChangeNotifierProvider(create: (_) => AIProvider()),
         ChangeNotifierProvider(create: (_) => CreatorProfileProvider()),
         ChangeNotifierProvider(create: (_) => SelectionProvider()),
@@ -52,6 +55,9 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
+      builder: (context, child) {
+        return InactivityMonitor(child: child!);
+      },
     );
   }
 }

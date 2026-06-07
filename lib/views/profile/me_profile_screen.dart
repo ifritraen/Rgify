@@ -10,6 +10,7 @@ import '../../providers/theme_provider.dart';
 import '../creator/creator_profile_screen.dart';
 import '../player/tag_results_screen.dart';
 import '../widgets/glassy_container.dart';
+import '../widgets/playback_settings_sheet.dart';
 
 class MeProfileScreen extends StatefulWidget {
   const MeProfileScreen({super.key});
@@ -353,6 +354,20 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
         elevation: 0,
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: Icon(
+              Icons.settings_outlined,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white : AppTheme.textPrimaryLight,
+            ),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (context) => const PlaybackSettingsSheet(),
+              );
+            },
+          ),
           Consumer<ThemeProvider>(
             builder: (context, themeProvider, child) {
               return IconButton(

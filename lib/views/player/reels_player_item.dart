@@ -10,6 +10,8 @@ import '../../providers/search_provider.dart';
 import '../../providers/download_provider.dart';
 import '../../services/video_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../providers/playback_settings_provider.dart';
+import '../widgets/inactivity_monitor.dart';
 import '../widgets/playlist_selector_sheet.dart';
 import '../widgets/neon_vector_buttons.dart';
 import '../creator/creator_profile_screen.dart';
@@ -18,11 +20,13 @@ import 'tag_results_screen.dart';
 class ReelsPlayerItem extends StatefulWidget {
   final GifInfo gif;
   final bool isActive;
+  final VoidCallback? onVideoFinished;
 
   const ReelsPlayerItem({
     super.key,
     required this.gif,
     required this.isActive,
+    this.onVideoFinished,
   });
 
   @override
@@ -37,6 +41,8 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
   bool _showHud = false;
   // bool _isDownloading = false;
   // double _downloadProgress = 0.0;
+  int _currentPlayCount = 0;
+  bool _isCompleted = false;
 
   // Custom seeking / speed states
   Timer? _seekTimer;
@@ -103,25 +109,35 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
           _initialized = true;
           _durationMs = _controller!.value.duration.inMilliseconds.toDouble();
         });
-        _controller!.setLooping(true);
+        _controller!.setLooping(false);
         _controller!.addListener(_onControllerUpdate);
         
         if (widget.isActive) {
           _controller!.play();
-          setState(() {
-          // _isPlaying = true;
-          });
+          InactivityMonitor.isAnyVideoPlaying = true;
         }
       });
   }
 
   void _onControllerUpdate() {
     if (!mounted || _controller == null) return;
-    if (!_isUserDraggingSeekBar && _controller!.value.isInitialized) {
+    final value = _controller!.value;
+    if (!_isUserDraggingSeekBar && value.isInitialized) {
       setState(() {
-        _currentPositionMs = _controller!.value.position.inMilliseconds.toDouble();
-        _durationMs = _controller!.value.duration.inMilliseconds.toDouble();
+        _currentPositionMs = value.position.inMilliseconds.toDouble();
+        _durationMs = value.duration.inMilliseconds.toDouble();
       });
+
+      if (widget.isActive) {
+        InactivityMonitor.isAnyVideoPlaying = value.isPlaying;
+      }
+
+      if (value.position >= value.duration && !value.isPlaying && !_isCompleted) {
+        _isCompleted = true;
+        _handleVideoFinished();
+      } else if (value.position < value.duration) {
+        _isCompleted = false;
+      }
     }
   }
 
@@ -130,20 +146,17 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
     super.didUpdateWidget(oldWidget);
     if (widget.isActive != oldWidget.isActive) {
       if (widget.isActive) {
+        _currentPlayCount = 0;
+        _isCompleted = false;
         _addToHistory();
         if (!_isImg && _controller != null && _initialized) {
           _controller!.play();
-          setState(() {
-            // _isPlaying = true;
-          });
+          InactivityMonitor.isAnyVideoPlaying = true;
         }
       } else {
         _stopLongPressActions();
         if (!_isImg && _controller != null && _initialized) {
           _controller!.pause();
-          setState(() {
-            // _isPlaying = false;
-          });
         }
       }
     }
@@ -156,6 +169,9 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
       _controller!.removeListener(_onControllerUpdate);
       _controller!.dispose();
     }
+    if (widget.isActive) {
+      InactivityMonitor.isAnyVideoPlaying = false;
+    }
     super.dispose();
   }
 
@@ -165,11 +181,11 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
     setState(() {
       if (_controller!.value.isPlaying) {
         _controller!.pause();
-        // _isPlaying = false;
+        InactivityMonitor.isAnyVideoPlaying = false;
         _playPauseOverlayIcon = Icons.pause;
       } else {
         _controller!.play();
-        // _isPlaying = true;
+        InactivityMonitor.isAnyVideoPlaying = true;
         _playPauseOverlayIcon = Icons.play_arrow;
       }
       _showPlayPauseOverlay = true;
@@ -261,6 +277,134 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => PlaylistSelectorSheet(gif: widget.gif),
+    );
+  }
+
+  void _handleVideoFinished() {
+    final settings = Provider.of<PlaybackSettingsProvider>(context, listen: false);
+    _currentPlayCount++;
+
+    if (settings.repeatSingle) {
+      if (_currentPlayCount < settings.repeatLimit) {
+        _replayVideo();
+      } else {
+        _pauseAndResetCount("Paused after ${settings.repeatLimit} loops");
+      }
+      return;
+    }
+
+    switch (settings.playbackAction) {
+      case PlaybackAction.playOnceAndNext:
+        if (settings.autoplayNext) {
+          _triggerNextVideo();
+        } else {
+          _pauseAndResetCount(null);
+        }
+        break;
+      case PlaybackAction.repeatXAndNext:
+        if (_currentPlayCount < settings.repeatLimit) {
+          _replayVideo();
+        } else {
+          if (settings.autoplayNext) {
+            _triggerNextVideo();
+          } else {
+            _pauseAndResetCount(null);
+          }
+        }
+        break;
+      case PlaybackAction.repeatXAndPause:
+        if (_currentPlayCount < settings.repeatLimit) {
+          _replayVideo();
+        } else {
+          _pauseAndResetCount("Paused after ${settings.repeatLimit} loops (Sleep Mode)");
+        }
+        break;
+    }
+  }
+
+  void _replayVideo() {
+    if (_controller == null) return;
+    _isCompleted = false;
+    _controller!.seekTo(Duration.zero).then((_) {
+      if (mounted && widget.isActive) {
+        _controller!.play();
+      }
+    });
+  }
+
+  void _pauseAndResetCount(String? message) {
+    _currentPlayCount = 0;
+    _isCompleted = false;
+    if (_controller != null) {
+      _controller!.pause();
+    }
+    if (message != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppTheme.primaryNeon.withAlpha(200),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _triggerNextVideo() {
+    _currentPlayCount = 0;
+    _isCompleted = false;
+    if (widget.onVideoFinished != null) {
+      widget.onVideoFinished!();
+    }
+  }
+
+  Widget _buildHUDIconButton({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+    required Color activeGlowColor,
+    required VoidCallback onTap,
+  }) {
+    final double size = 20;
+    final iconColor = isActive ? activeGlowColor : Colors.white70;
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: size + 20,
+            height: size + 20,
+            decoration: BoxDecoration(
+              color: Colors.black.withAlpha(90),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isActive ? activeGlowColor.withAlpha(150) : Colors.white.withAlpha(30), 
+                width: 1.0,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isActive ? activeGlowColor.withAlpha(80) : Colors.transparent,
+                  blurRadius: 8,
+                  spreadRadius: 0.5,
+                )
+              ],
+            ),
+            child: Center(
+              child: Icon(icon, color: iconColor, size: size),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -535,6 +679,40 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                     onTap: () {
                       final shareUrl = widget.gif.urls.html ?? 'https://www.redgifs.com/watch/${widget.gif.id}';
                       Share.share(shareUrl);
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Playback Settings Consumer for Shuffle, Repeat, Autoplay
+                  Consumer<PlaybackSettingsProvider>(
+                    builder: (context, playbackSettings, child) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildHUDIconButton(
+                            icon: playbackSettings.shuffleEnabled ? Icons.shuffle : Icons.shuffle_outlined,
+                            label: 'Shuffle',
+                            isActive: playbackSettings.shuffleEnabled,
+                            activeGlowColor: AppTheme.secondaryNeon,
+                            onTap: () => playbackSettings.setShuffleEnabled(!playbackSettings.shuffleEnabled),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildHUDIconButton(
+                            icon: playbackSettings.repeatSingle ? Icons.repeat_one : Icons.repeat,
+                            label: 'Repeat',
+                            isActive: playbackSettings.repeatSingle,
+                            activeGlowColor: AppTheme.primaryNeon,
+                            onTap: () => playbackSettings.setRepeatSingle(!playbackSettings.repeatSingle),
+                          ),
+                          const SizedBox(height: 12),
+                          _buildHUDIconButton(
+                            icon: playbackSettings.autoplayNext ? Icons.play_arrow : Icons.pause,
+                            label: 'Autoplay',
+                            isActive: playbackSettings.autoplayNext,
+                            activeGlowColor: AppTheme.accentNeon,
+                            onTap: () => playbackSettings.setAutoplayNext(!playbackSettings.autoplayNext),
+                          ),
+                        ],
+                      );
                     },
                   ),
                 ],
