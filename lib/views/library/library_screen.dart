@@ -660,8 +660,9 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
             ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 // Sub-screen to view videos inside a playlist
