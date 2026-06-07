@@ -102,13 +102,14 @@ class LocalPlayerProvider extends ChangeNotifier {
       final list = await dir.list().toList();
 
       for (var entity in list) {
-        if (entity is Directory) {
+        final path = entity.path;
+        if (entity is Directory || FileSystemEntity.isDirectorySync(path)) {
           // Skip hidden directories (starting with '.')
-          if (!p.basename(entity.path).startsWith('.')) {
+          if (!p.basename(path).startsWith('.')) {
             _subFolders.add(entity);
           }
-        } else if (entity is File) {
-          final ext = p.extension(entity.path).toLowerCase();
+        } else if (entity is File || FileSystemEntity.isFileSync(path)) {
+          final ext = p.extension(path).toLowerCase();
           if (ext == '.mp4' || 
               ext == '.mkv' || 
               ext == '.mov' || 
