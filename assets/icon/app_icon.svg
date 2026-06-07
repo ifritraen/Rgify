@@ -1,61 +1,48 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Background Gradient -->
+    <!-- Vibrant Cheerful Light Background Gradient -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F0C1B" />
-      <stop offset="50%" stop-color="#150F2E" />
-      <stop offset="100%" stop-color="#05030A" />
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#F5F7FA" />
     </linearGradient>
 
-    <!-- Neon Pink Gradient -->
+    <!-- Vibrant Posh Pink/Orange Gradient -->
     <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF2E93" />
-      <stop offset="100%" stop-color="#FF8E53" />
+      <stop offset="0%" stop-color="#FF3366" />
+      <stop offset="100%" stop-color="#FF9933" />
     </linearGradient>
 
-    <!-- Neon Cyan/Violet Gradient -->
+    <!-- Vibrant Posh Cyan/Blue Gradient -->
     <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00F2FE" />
-      <stop offset="100%" stop-color="#4FACFE" />
+      <stop offset="0%" stop-color="#33CCFF" />
+      <stop offset="100%" stop-color="#3366FF" />
     </linearGradient>
 
-    <!-- Glow Filters -->
-    <filter id="glowPink" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-
-    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
+    <!-- Subtle Shadows for Minimalism -->
+    <filter id="subtleShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#3366FF" flood-opacity="0.12" />
     </filter>
   </defs>
 
-  <!-- Circular Background (Instead of square/rect) -->
-  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="url(#cyanGrad)" stroke-width="4" />
+  <!-- Circular Light Background -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="#3366FF" stroke-width="2" stroke-opacity="0.1" />
 
-  <!-- Outer Glassy Ring -->
-  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#cyanGrad)" stroke-width="4" stroke-opacity="0.3" />
-  <circle cx="256" cy="256" r="190" fill="none" stroke="url(#pinkGrad)" stroke-width="2" stroke-opacity="0.15" />
+  <!-- Outer Elegant Posh Rings -->
+  <circle cx="256" cy="256" r="210" fill="none" stroke="url(#cyanGrad)" stroke-width="3" stroke-opacity="0.4" />
+  <circle cx="256" cy="256" r="190" fill="none" stroke="url(#pinkGrad)" stroke-width="1.5" stroke-opacity="0.3" />
 
   <!-- Play Button Vector / R Logo Accent -->
-  <g transform="translate(140, 110)">
+  <g transform="translate(140, 110)" filter="url(#subtleShadow)">
     <!-- R vertical leg -->
-    <rect x="0" y="0" width="45" height="290" rx="15" fill="url(#pinkGrad)" filter="url(#glowPink)" />
+    <rect x="0" y="0" width="45" height="290" rx="15" fill="url(#pinkGrad)" />
     
     <!-- R loop -->
-    <path d="M 40 0 C 130 0, 180 40, 180 110 C 180 170, 130 200, 40 200 Z" fill="none" stroke="url(#pinkGrad)" stroke-width="45" stroke-linecap="round" stroke-linejoin="round" filter="url(#glowPink)" />
+    <path d="M 40 0 C 130 0, 180 40, 180 110 C 180 170, 130 200, 40 200 Z" fill="none" stroke="url(#pinkGrad)" stroke-width="45" stroke-linecap="round" stroke-linejoin="round" />
     
-    <!-- Play button inside R loop / Cyan core -->
-    <path d="M 75 65 L 140 100 L 75 135 Z" fill="url(#cyanGrad)" filter="url(#glowCyan)" />
+    <!-- Play button inside R loop / Vibrant core -->
+    <path d="M 75 65 L 140 100 L 75 135 Z" fill="url(#cyanGrad)" />
 
     <!-- R leg kickout as a play arrow direction indicator -->
-    <path d="M 100 180 L 195 290" stroke="url(#cyanGrad)" stroke-width="45" stroke-linecap="round" filter="url(#glowCyan)" />
+    <path d="M 100 180 L 195 290" stroke="url(#cyanGrad)" stroke-width="45" stroke-linecap="round" />
   </g>
 </svg>
