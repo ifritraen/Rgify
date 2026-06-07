@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.06" />
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="140" fill="#FFFFFF" />
+  <!-- Pastel Light Blue Base -->
+  <rect x="64" y="64" width="384" height="384" rx="96" fill="#F0F8FF" stroke="#E6F2FF" stroke-width="2" />
+
+  <g filter="url(#shadow)">
+    <!-- Stem: Pastel Pink -->
+    <rect x="160" y="130" width="48" height="252" rx="24" fill="#FF6B9D" />
+    <!-- Kickstand: Light Yellow -->
+    <path d="M 220 250 L 300 370" stroke="#FFE066" stroke-width="48" stroke-linecap="round" />
+    <!-- Play Loop: Frosted Glass Overlay -->
+    <path d="M 200 130 L 340 210 C 350 216, 350 224, 340 230 L 200 310 Z" 
+          fill="#FFFFFF" fill-opacity="0.35" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="5" stroke-linejoin="round" />
+    <!-- Internal Play Icon (Pink) -->
+    <path d="M 235 180 L 295 220 L 235 260 Z" fill="#FF6B9D" />
+  </g>
+</svg>
