@@ -23,6 +23,8 @@ import '../../providers/selection_provider.dart';
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  static final ValueNotifier<bool> headerVisibility = ValueNotifier<bool>(true);
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -227,15 +229,26 @@ class _HomeScreenState extends State<HomeScreen> {
       initialIndex: 0,
       child: Column(
         children: [
-          TabBar(
-            indicatorColor: AppTheme.primaryNeon,
-            indicatorSize: TabBarIndicatorSize.label,
-            labelColor: Colors.white,
-            unselectedLabelColor: AppTheme.textSecondary,
-            tabs: [
-              Tab(text: 'Feed'),
-              Tab(text: 'Trending'),
-            ],
+          ValueListenableBuilder<bool>(
+            valueListenable: HomeScreen.headerVisibility,
+            builder: (context, isVisible, child) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                height: isVisible ? 48 : 0,
+                child: isVisible
+                    ? const TabBar(
+                        indicatorColor: AppTheme.primaryNeon,
+                        indicatorSize: TabBarIndicatorSize.label,
+                        labelColor: Colors.white,
+                        unselectedLabelColor: AppTheme.textSecondary,
+                        tabs: [
+                          Tab(text: 'Feed'),
+                          Tab(text: 'Trending'),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              );
+            },
           ),
           Expanded(
             child: TabBarView(
@@ -342,6 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     _isBottomBarVisible = false;
                   });
+                  HomeScreen.headerVisibility.value = false;
                 }
               } else if (scrollDelta < -2.0) {
                 // Scrolling up - show bottom bar
@@ -349,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   setState(() {
                     _isBottomBarVisible = true;
                   });
+                  HomeScreen.headerVisibility.value = true;
                 }
               }
             }
@@ -851,21 +866,35 @@ class _TrendingFeedViewState extends State<TrendingFeedView> {
 
     return Column(
       children: [
-        const SizedBox(height: 8),
-        Container(
-          height: 36,
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _buildSortChip(feed, 'trending', '🔥 Trending'),
-              const SizedBox(width: 8),
-              _buildSortChip(feed, 'new', '⚡ Newest'),
-              const SizedBox(width: 8),
-              _buildSortChip(feed, 'top', '⭐ Best / Popular'),
-            ],
-          ),
+        ValueListenableBuilder<bool>(
+          valueListenable: HomeScreen.headerVisibility,
+          builder: (context, isVisible, child) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: isVisible ? 44 : 0,
+              child: isVisible
+                  ? Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Container(
+                          height: 36,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            children: [
+                              _buildSortChip(feed, 'trending', '🔥 Trending'),
+                              const SizedBox(width: 8),
+                              _buildSortChip(feed, 'new', '⚡ Newest'),
+                              const SizedBox(width: 8),
+                              _buildSortChip(feed, 'top', '⭐ Best / Popular'),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            );
+          },
         ),
         Expanded(
           child: RefreshIndicator(

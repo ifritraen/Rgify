@@ -11,6 +11,7 @@ import '../creator/creator_profile_screen.dart';
 import '../player/tag_results_screen.dart';
 import '../widgets/bulk_action_bar.dart';
 import '../widgets/glassy_container.dart';
+import '../home/home_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -128,38 +129,46 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     required String? activeTime,
     required Function(String order, String? time) onFilterChanged,
   }) {
-    return Container(
-      height: 34,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: [
-          _buildFilterChip(
-            isSelected: activeOrder == 'trending',
-            label: '🔥 Trending',
-            onTap: () => onFilterChanged('trending', null),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            isSelected: activeOrder == 'top' && activeTime == 'week',
-            label: '⭐ Top Week',
-            onTap: () => onFilterChanged('top', 'week'),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            isSelected: activeOrder == 'top' && activeTime == 'month',
-            label: '⭐ Top Month',
-            onTap: () => onFilterChanged('top', 'month'),
-          ),
-          const SizedBox(width: 8),
-          _buildFilterChip(
-            isSelected: activeOrder == 'latest',
-            label: '⚡ Latest',
-            onTap: () => onFilterChanged('latest', null),
-          ),
-        ],
-      ),
+    return ValueListenableBuilder<bool>(
+      valueListenable: HomeScreen.headerVisibility,
+      builder: (context, isVisible, child) {
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          height: isVisible ? 34 : 0,
+          margin: EdgeInsets.symmetric(vertical: isVisible ? 8 : 0),
+          child: isVisible
+              ? ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _buildFilterChip(
+                      isSelected: activeOrder == 'trending',
+                      label: '🔥 Trending',
+                      onTap: () => onFilterChanged('trending', null),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      isSelected: activeOrder == 'top' && activeTime == 'week',
+                      label: '⭐ Top Week',
+                      onTap: () => onFilterChanged('top', 'week'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      isSelected: activeOrder == 'top' && activeTime == 'month',
+                      label: '⭐ Top Month',
+                      onTap: () => onFilterChanged('top', 'month'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      isSelected: activeOrder == 'latest',
+                      label: '⚡ Latest',
+                      onTap: () => onFilterChanged('latest', null),
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
+        );
+      },
     );
   }
 
@@ -168,63 +177,74 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     final provider = Provider.of<ExploreProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0, // No main App bar text to save space
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
-          child: ClipRRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.glassBg,
-                  border: Border(
-                    bottom: BorderSide(color: AppTheme.border, width: 1.0),
+      body: SafeArea(
+        child: Column(
+          children: [
+            ValueListenableBuilder<bool>(
+              valueListenable: HomeScreen.headerVisibility,
+              builder: (context, isVisible, child) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: isVisible ? 40 : 0,
+                  child: isVisible
+                      ? ClipRRect(
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppTheme.glassBg,
+                                border: Border(
+                                  bottom: BorderSide(color: AppTheme.border, width: 1.0),
+                                ),
+                              ),
+                              child: TabBar(
+                                controller: _tabController,
+                                indicator: const UnderlineTabIndicator(
+                                  borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
+                                  insets: EdgeInsets.symmetric(horizontal: 16),
+                                ),
+                                labelColor: AppTheme.textPrimary,
+                                unselectedLabelColor: AppTheme.textSecondary,
+                                labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
+                                unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
+                                isScrollable: true,
+                                tabs: const [
+                                  Tab(text: 'Gif'),
+                                  Tab(text: 'Images'),
+                                  Tab(text: 'Creator'),
+                                  Tab(text: 'Niche'),
+                                  Tab(text: 'Tags'),
+                                ],
+                                onTap: (index) {
+                                  Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
+                                },
+                              ),
+                            ),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                );
+              },
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildGifTab(provider),
+                      _buildImageTab(provider),
+                      _buildCreatorTab(provider),
+                      _buildNicheTab(provider),
+                      _buildTagsTab(provider),
+                    ],
                   ),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: const UnderlineTabIndicator(
-                    borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
-                    insets: EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  labelColor: AppTheme.textPrimary,
-                  unselectedLabelColor: AppTheme.textSecondary,
-                  labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
-                  isScrollable: true,
-                  tabs: const [
-                    Tab(text: 'Gif'),
-                    Tab(text: 'Images'),
-                    Tab(text: 'Creator'),
-                    Tab(text: 'Niche'),
-                    Tab(text: 'Tags'),
-                  ],
-                  onTap: (index) {
-                    Provider.of<SelectionProvider>(context, listen: false).exitSelectionMode();
-                  },
-                ),
+                  const BulkActionBar(),
+                ],
               ),
             ),
-          ),
+          ],
         ),
-      ),
-      body: Stack(
-        children: [
-          TabBarView(
-            controller: _tabController,
-            children: [
-              _buildGifTab(provider),
-              _buildImageTab(provider),
-              _buildCreatorTab(provider),
-              _buildNicheTab(provider),
-              _buildTagsTab(provider),
-            ],
-          ),
-          const BulkActionBar(),
-        ],
       ),
     );
   }
@@ -455,82 +475,94 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     return Column(
       children: [
         // Niche horizontal catalog row
-        if (provider.isLoadingNiches && provider.niches.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Center(child: CircularProgressIndicator(color: AppTheme.primaryNeon)),
-          )
-        else if (provider.nichesError != null && provider.niches.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Error: ${provider.nichesError}', style: const TextStyle(color: Colors.redAccent)),
-          )
-        else
-          Container(
-            height: 44,
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: provider.niches.length,
-              itemBuilder: (context, index) {
-                final niche = provider.niches[index];
-                final isSelected = niche.id == provider.selectedNicheId;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(
-                    label: Text(
-                      niche.name,
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : AppTheme.textSecondary,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: AppTheme.primaryNeon,
-                    backgroundColor: AppTheme.cardBg,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight),
-                    ),
-                    onSelected: (selected) {
-                      if (selected) {
-                        provider.selectNiche(niche.id);
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+        ValueListenableBuilder<bool>(
+          valueListenable: HomeScreen.headerVisibility,
+          builder: (context, isVisible, child) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: isVisible ? 44 : 0,
+              margin: EdgeInsets.symmetric(vertical: isVisible ? 6 : 0),
+              child: isVisible
+                  ? (provider.isLoadingNiches && provider.niches.isEmpty
+                      ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryNeon))
+                      : (provider.nichesError != null && provider.niches.isEmpty
+                          ? Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Text('Error: ${provider.nichesError}', style: const TextStyle(color: Colors.redAccent)),
+                            )
+                          : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              itemCount: provider.niches.length,
+                              itemBuilder: (context, index) {
+                                final niche = provider.niches[index];
+                                final isSelected = niche.id == provider.selectedNicheId;
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    label: Text(
+                                      niche.name,
+                                      style: TextStyle(
+                                        color: isSelected ? Colors.white : AppTheme.textSecondary,
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                    selected: isSelected,
+                                    selectedColor: AppTheme.primaryNeon,
+                                    backgroundColor: AppTheme.cardBg,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                      side: BorderSide(color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight),
+                                    ),
+                                    onSelected: (selected) {
+                                      if (selected) {
+                                        provider.selectNiche(niche.id);
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            )))
+                  : const SizedBox.shrink(),
+            );
+          },
+        ),
 
         // Niche sorting row (Hot, Latest, Top)
-        Container(
-          height: 32,
-          margin: const EdgeInsets.only(bottom: 6),
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            children: [
-              _buildFilterChip(
-                isSelected: provider.nicheOrder == 'hot',
-                label: '🔥 Hot',
-                onTap: () => provider.setNicheOrder('hot'),
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                isSelected: provider.nicheOrder == 'latest',
-                label: '⚡ Latest',
-                onTap: () => provider.setNicheOrder('latest'),
-              ),
-              const SizedBox(width: 8),
-              _buildFilterChip(
-                isSelected: provider.nicheOrder == 'top',
-                label: '⭐ Top',
-                onTap: () => provider.setNicheOrder('top'),
-              ),
-            ],
-          ),
+        ValueListenableBuilder<bool>(
+          valueListenable: HomeScreen.headerVisibility,
+          builder: (context, isVisible, child) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: isVisible ? 32 : 0,
+              margin: EdgeInsets.only(bottom: isVisible ? 6 : 0),
+              child: isVisible
+                  ? ListView(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      children: [
+                        _buildFilterChip(
+                          isSelected: provider.nicheOrder == 'hot',
+                          label: '🔥 Hot',
+                          onTap: () => provider.setNicheOrder('hot'),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          isSelected: provider.nicheOrder == 'latest',
+                          label: '⚡ Latest',
+                          onTap: () => provider.setNicheOrder('latest'),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildFilterChip(
+                          isSelected: provider.nicheOrder == 'top',
+                          label: '⭐ Top',
+                          onTap: () => provider.setNicheOrder('top'),
+                        ),
+                      ],
+                    )
+                  : const SizedBox.shrink(),
+            );
+          },
         ),
 
         // Selected niche gifs grid
@@ -619,76 +651,95 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     return Column(
       children: [
         // Tag search bar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: TextField(
-            controller: _tagSearchController,
-            style: TextStyle(color: AppTheme.textPrimary),
-            decoration: InputDecoration(
-              hintText: 'Filter tags...',
-              hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.7)),
-              prefixIcon: Icon(Icons.filter_list, color: AppTheme.textSecondary.withOpacity(0.8)),
-              suffixIcon: _tagSearchQuery.isNotEmpty
-                  ? IconButton(
-                      icon: Icon(Icons.clear, color: AppTheme.textSecondary.withOpacity(0.8)),
-                      onPressed: () => _tagSearchController.clear(),
+        ValueListenableBuilder<bool>(
+          valueListenable: HomeScreen.headerVisibility,
+          builder: (context, isVisible, child) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: isVisible ? 48 : 0, // 32 of TextField height + 16 of padding
+              margin: EdgeInsets.symmetric(vertical: isVisible ? 8 : 0),
+              child: isVisible
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: _tagSearchController,
+                        style: TextStyle(color: AppTheme.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Filter tags...',
+                          hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.7)),
+                          prefixIcon: Icon(Icons.filter_list, color: AppTheme.textSecondary.withOpacity(0.8)),
+                          suffixIcon: _tagSearchQuery.isNotEmpty
+                              ? IconButton(
+                                  icon: Icon(Icons.clear, color: AppTheme.textSecondary.withOpacity(0.8)),
+                                  onPressed: () => _tagSearchController.clear(),
+                                )
+                              : null,
+                          filled: true,
+                          fillColor: AppTheme.cardBg,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide(color: AppTheme.border),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: const BorderSide(color: AppTheme.primaryNeon),
+                          ),
+                        ),
+                      ),
                     )
-                  : null,
-              filled: true,
-              fillColor: AppTheme.cardBg,
-              contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide(color: AppTheme.border),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: const BorderSide(color: AppTheme.primaryNeon),
-              ),
-            ),
-          ),
+                  : const SizedBox.shrink(),
+            );
+          },
         ),
 
         // A-Z Quick Selector
-        if (sortedKeys.isNotEmpty)
-          Container(
-            height: 38,
-            margin: const EdgeInsets.only(bottom: 8),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: sortedKeys.length,
-              itemBuilder: (context, index) {
-                final key = sortedKeys[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: ActionChip(
-                    backgroundColor: AppTheme.cardBg,
-                    side: BorderSide(color: AppTheme.borderLight),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    label: Text(
-                      key,
-                      style: const TextStyle(
-                        color: AppTheme.primaryNeon,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                    onPressed: () {
-                      final targetKey = _sectionKeys[key];
-                      if (targetKey != null && targetKey.currentContext != null) {
-                        Scrollable.ensureVisible(
-                          targetKey.currentContext!,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+        ValueListenableBuilder<bool>(
+          valueListenable: HomeScreen.headerVisibility,
+          builder: (context, isVisible, child) {
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: isVisible && sortedKeys.isNotEmpty ? 38 : 0,
+              margin: EdgeInsets.only(bottom: isVisible && sortedKeys.isNotEmpty ? 8 : 0),
+              child: isVisible && sortedKeys.isNotEmpty
+                  ? ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: sortedKeys.length,
+                      itemBuilder: (context, index) {
+                        final key = sortedKeys[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: ActionChip(
+                            backgroundColor: AppTheme.cardBg,
+                            side: BorderSide(color: AppTheme.borderLight),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            label: Text(
+                              key,
+                              style: const TextStyle(
+                                color: AppTheme.primaryNeon,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                            onPressed: () {
+                              final targetKey = _sectionKeys[key];
+                              if (targetKey != null && targetKey.currentContext != null) {
+                                Scrollable.ensureVisible(
+                                  targetKey.currentContext!,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            },
+                          ),
                         );
-                      }
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+                      },
+                    )
+                  : const SizedBox.shrink(),
+            );
+          },
+        ),
 
         Expanded(
           child: RefreshIndicator(

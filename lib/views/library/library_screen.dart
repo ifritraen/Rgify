@@ -10,6 +10,7 @@ import '../widgets/bulk_action_bar.dart';
 import '../widgets/glassy_container.dart';
 import '../../providers/download_provider.dart';
 import '../creator/creator_profile_screen.dart';
+import '../home/home_screen.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -133,60 +134,80 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     final provider = Provider.of<LibraryProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.textPrimary)),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.file_upload_outlined, color: AppTheme.textPrimary),
-            tooltip: 'Import Backup',
-            onPressed: () => provider.triggerImport(context),
-          ),
-          IconButton(
-            icon: Icon(Icons.file_download_outlined, color: AppTheme.textPrimary),
-            tooltip: 'Export Backup',
-            onPressed: () => provider.triggerExport(context),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(40),
-          child: ClipRRect(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: AppTheme.glassBg,
-                  border: Border(
-                    bottom: BorderSide(color: AppTheme.border, width: 1.0),
-                  ),
-                ),
-                child: TabBar(
-                  controller: _tabController,
-                  indicator: const UnderlineTabIndicator(
-                    borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
-                    insets: EdgeInsets.symmetric(horizontal: 24),
-                  ),
-                  labelColor: AppTheme.textPrimary,
-                  unselectedLabelColor: AppTheme.textSecondary,
-                  labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
-                  unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
-                  tabs: const [
-                    Tab(text: 'Favorites'),
-                    Tab(text: 'Playlists'),
-                    Tab(text: 'History'),
-                    Tab(text: 'Downloads'),
-                    Tab(text: 'Subscriptions'),
-                  ],
-                ),
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            ValueListenableBuilder<bool>(
+              valueListenable: HomeScreen.headerVisibility,
+              builder: (context, isVisible, child) {
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  height: isVisible ? 96 : 0,
+                  child: isVisible
+                      ? Column(
+                          children: [
+                            Container(
+                              height: 56,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Row(
+                                children: [
+                                  Text('My Library', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppTheme.textPrimary)),
+                                  const Spacer(),
+                                  IconButton(
+                                    icon: Icon(Icons.file_upload_outlined, color: AppTheme.textPrimary),
+                                    tooltip: 'Import Backup',
+                                    onPressed: () => provider.triggerImport(context),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.file_download_outlined, color: AppTheme.textPrimary),
+                                    tooltip: 'Export Backup',
+                                    onPressed: () => provider.triggerExport(context),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ClipRRect(
+                              child: BackdropFilter(
+                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                                child: Container(
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.glassBg,
+                                    border: Border(
+                                      bottom: BorderSide(color: AppTheme.border, width: 1.0),
+                                    ),
+                                  ),
+                                  child: TabBar(
+                                    controller: _tabController,
+                                    indicator: const UnderlineTabIndicator(
+                                      borderSide: BorderSide(color: AppTheme.primaryNeon, width: 1.5),
+                                      insets: EdgeInsets.symmetric(horizontal: 24),
+                                    ),
+                                    labelColor: AppTheme.textPrimary,
+                                    unselectedLabelColor: AppTheme.textSecondary,
+                                    labelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.bold),
+                                    unselectedLabelStyle: GoogleFonts.outfit(fontSize: 13, fontWeight: FontWeight.normal),
+                                    tabs: const [
+                                      Tab(text: 'Favorites'),
+                                      Tab(text: 'Playlists'),
+                                      Tab(text: 'History'),
+                                      Tab(text: 'Downloads'),
+                                      Tab(text: 'Subscriptions'),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                );
+              },
             ),
-          ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
           // Favorites tab
           Builder(
             builder: (context) {
@@ -204,120 +225,127 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
 
               return Column(
                 children: [
-                  // Categories filter bar
-                  Container(
-                    height: 50,
-                    margin: const EdgeInsets.only(top: 8, bottom: 4),
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: [
-                        // "All" chip
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            label: const Text('All'),
-                            selected: _selectedFavoriteCategory == 'All',
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() {
-                                  _selectedFavoriteCategory = 'All';
-                                });
-                              }
-                            },
-                            backgroundColor: AppTheme.cardBg,
-                            selectedColor: AppTheme.primaryNeon,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(
-                                color: _selectedFavoriteCategory == 'All' ? AppTheme.primaryNeon : AppTheme.borderLight,
-                              ),
-                            ),
-                            labelStyle: TextStyle(
-                              color: _selectedFavoriteCategory == 'All' ? Colors.white : AppTheme.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        // Custom categories
-                        ...provider.favoriteCategories.map((cat) {
-                          final isSelected = _selectedFavoriteCategory == cat;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: GestureDetector(
-                              onLongPress: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    backgroundColor: AppTheme.background,
-                                    title: Text('Delete Category "$cat"?', style: TextStyle(color: textColor)),
-                                    content: Text('This will delete the category but keep your favorites.', style: TextStyle(color: subtitleColor)),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+                  ValueListenableBuilder<bool>(
+                    valueListenable: HomeScreen.headerVisibility,
+                    builder: (context, isVisible, child) {
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        height: isVisible ? 50 : 0,
+                        margin: EdgeInsets.only(top: isVisible ? 8 : 0, bottom: isVisible ? 4 : 0),
+                        child: isVisible
+                            ? ListView(
+                                scrollDirection: Axis.horizontal,
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                children: [
+                                  // "All" chip
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ChoiceChip(
+                                      label: const Text('All'),
+                                      selected: _selectedFavoriteCategory == 'All',
+                                      onSelected: (selected) {
+                                        if (selected) {
+                                          setState(() {
+                                            _selectedFavoriteCategory = 'All';
+                                          });
+                                        }
+                                      },
+                                      backgroundColor: AppTheme.cardBg,
+                                      selectedColor: AppTheme.primaryNeon,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(
+                                          color: _selectedFavoriteCategory == 'All' ? AppTheme.primaryNeon : AppTheme.borderLight,
+                                        ),
                                       ),
-                                      TextButton(
-                                        onPressed: () {
-                                          provider.deleteFavoriteCategory(cat);
-                                          if (_selectedFavoriteCategory == cat) {
-                                            setState(() {
-                                              _selectedFavoriteCategory = 'All';
-                                            });
-                                          }
-                                          Navigator.pop(context);
+                                      labelStyle: TextStyle(
+                                        color: _selectedFavoriteCategory == 'All' ? Colors.white : AppTheme.textSecondary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  // Custom categories
+                                  ...provider.favoriteCategories.map((cat) {
+                                    final isSelected = _selectedFavoriteCategory == cat;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(right: 8),
+                                      child: GestureDetector(
+                                        onLongPress: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              backgroundColor: AppTheme.background,
+                                              title: Text('Delete Category "$cat"?', style: TextStyle(color: textColor)),
+                                              content: Text('This will delete the category but keep your favorites.', style: TextStyle(color: subtitleColor)),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(context),
+                                                  child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    provider.deleteFavoriteCategory(cat);
+                                                    if (_selectedFavoriteCategory == cat) {
+                                                      setState(() {
+                                                        _selectedFavoriteCategory = 'All';
+                                                      });
+                                                    }
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                                ),
+                                              ],
+                                            ),
+                                          );
                                         },
-                                        child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+                                        child: ChoiceChip(
+                                          label: Text(cat),
+                                          selected: isSelected,
+                                          onSelected: (selected) {
+                                            if (selected) {
+                                              setState(() {
+                                                _selectedFavoriteCategory = cat;
+                                              });
+                                            }
+                                          },
+                                          backgroundColor: AppTheme.cardBg,
+                                          selectedColor: AppTheme.primaryNeon,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(16),
+                                            side: BorderSide(
+                                              color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight,
+                                            ),
+                                          ),
+                                          labelStyle: TextStyle(
+                                            color: isSelected ? Colors.white : AppTheme.textSecondary,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                          ),
+                                        ),
                                       ),
-                                    ],
+                                    );
+                                  }),
+                                  // Add category chip button
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: InputChip(
+                                      label: const Text('+ Add Category'),
+                                      onPressed: () => _showCreateCategoryDialog(context, provider),
+                                      backgroundColor: AppTheme.cardBg,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(16),
+                                        side: BorderSide(color: AppTheme.borderLight),
+                                      ),
+                                      labelStyle: const TextStyle(
+                                        color: AppTheme.primaryNeon,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                );
-                              },
-                              child: ChoiceChip(
-                                label: Text(cat),
-                                selected: isSelected,
-                                onSelected: (selected) {
-                                  if (selected) {
-                                    setState(() {
-                                      _selectedFavoriteCategory = cat;
-                                    });
-                                  }
-                                },
-                                backgroundColor: AppTheme.cardBg,
-                                selectedColor: AppTheme.primaryNeon,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  side: BorderSide(
-                                    color: isSelected ? AppTheme.primaryNeon : AppTheme.borderLight,
-                                  ),
-                                ),
-                                labelStyle: TextStyle(
-                                  color: isSelected ? Colors.white : AppTheme.textSecondary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                        // Add category chip button
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: InputChip(
-                            label: const Text('+ Add Category'),
-                            onPressed: () => _showCreateCategoryDialog(context, provider),
-                            backgroundColor: AppTheme.cardBg,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              side: BorderSide(color: AppTheme.borderLight),
-                            ),
-                            labelStyle: const TextStyle(
-                              color: AppTheme.primaryNeon,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                                ],
+                              )
+                            : const SizedBox.shrink(),
+                      );
+                    },
                   ),
                   // Grid view of favorites
                   Expanded(
