@@ -245,13 +245,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: isVisible
                     ? Row(
                         children: [
-                          const Expanded(
+                          Expanded(
                             child: TabBar(
                               indicatorColor: AppTheme.primaryNeon,
                               indicatorSize: TabBarIndicatorSize.label,
                               labelColor: Colors.white,
                               unselectedLabelColor: AppTheme.textSecondary,
-                              tabs: [
+                              tabs: const [
                                 Tab(text: 'Feed'),
                                 Tab(text: 'Trending'),
                               ],
