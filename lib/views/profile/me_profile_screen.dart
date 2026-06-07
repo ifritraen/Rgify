@@ -12,6 +12,7 @@ import '../player/tag_results_screen.dart';
 import '../widgets/glassy_container.dart';
 import '../widgets/playback_settings_sheet.dart';
 import '../../providers/library_provider.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MeProfileScreen extends StatefulWidget {
   const MeProfileScreen({super.key});
@@ -22,6 +23,76 @@ class MeProfileScreen extends StatefulWidget {
 
 class _MeProfileScreenState extends State<MeProfileScreen> {
   final IsarService _isarService = IsarService();
+  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
+  String _userName = 'Hello, Human';
+  bool _isLoadingName = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await _secureStorage.read(key: 'user_display_name');
+    if (mounted) {
+      setState(() {
+        _userName = (name != null && name.trim().isNotEmpty) ? name : 'Hello, Human';
+        _isLoadingName = false;
+      });
+    }
+  }
+
+  Future<void> _updateUserName(String newName) async {
+    await _secureStorage.write(key: 'user_display_name', value: newName);
+    setState(() {
+      _userName = newName.trim().isNotEmpty ? newName : 'Hello, Human';
+    });
+  }
+
+  void _showEditNameDialog() {
+    final controller = TextEditingController(text: _userName == 'Hello, Human' ? '' : _userName);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : AppTheme.textPrimaryLight;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.background,
+          title: Text('Edit Profile Name', style: TextStyle(color: textColor)),
+          content: TextField(
+            controller: controller,
+            style: TextStyle(color: textColor),
+            decoration: InputDecoration(
+              hintText: 'Enter your name...',
+              hintStyle: TextStyle(color: AppTheme.textSecondary.withOpacity(0.6)),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppTheme.border),
+              ),
+              focusedBorder: const UnderlineInputBorder(
+                borderSide: BorderSide(color: AppTheme.primaryNeon),
+              ),
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: AppTheme.textSecondary)),
+            ),
+            TextButton(
+              onPressed: () {
+                _updateUserName(controller.text.trim());
+                Navigator.pop(context);
+              },
+              child: const Text('Save', style: TextStyle(color: AppTheme.primaryNeon)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<Map<String, List<MapEntry<String, int>>>> _calculateStats() async {
     final exploreProvider = Provider.of<ExploreProvider>(context, listen: false);
@@ -447,13 +518,31 @@ class _MeProfileScreenState extends State<MeProfileScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Anonymous Viewer',
-                              style: GoogleFonts.outfit(
-                                color: isDark ? Colors.white : AppTheme.textPrimaryLight,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _userName,
+                                    style: GoogleFonts.outfit(
+                                      color: isDark ? Colors.white : AppTheme.textPrimaryLight,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.edit_outlined,
+                                    size: 16,
+                                    color: AppTheme.textSecondary.withOpacity(0.7),
+                                  ),
+                                  onPressed: _showEditNameDialog,
+                                  constraints: const BoxConstraints(),
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
