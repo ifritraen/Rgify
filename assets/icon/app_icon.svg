@@ -1,37 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Vibrant Cheerful Sunset Gradient -->
-    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF2D55" /> <!-- Cheerful Pink -->
-      <stop offset="50%" stop-color="#FF5E3A" /> <!-- Vibrant Orange -->
-      <stop offset="100%" stop-color="#FFB300" /> <!-- Sunset Gold -->
+    <!-- Vibrant Cheerful Gradients -->
+    <linearGradient id="sunsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2D55" /> <!-- Cheerful Hot Pink -->
+      <stop offset="50%" stop-color="#FF5E3A" /> <!-- Vibrant Coral -->
+      <stop offset="100%" stop-color="#FFD60A" /> <!-- Sunny Gold -->
     </linearGradient>
 
-    <!-- Sleek Neon Violet Glow -->
-    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF2D55" />
-      <stop offset="100%" stop-color="#AF52DE" /> <!-- Cheerful Purple -->
+    <linearGradient id="neonCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C6FF" /> <!-- Electric Cyan -->
+      <stop offset="100%" stop-color="#0072FF" /> <!-- Bright Blue -->
     </linearGradient>
-    
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#FF2D55" flood-opacity="0.25" />
+
+    <!-- Glass Dropshadow -->
+    <filter id="glassShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#FF2D55" flood-opacity="0.15" />
+    </filter>
+
+    <!-- Refraction Shadows -->
+    <filter id="refract" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.08" />
     </filter>
   </defs>
 
-  <!-- Clean, Cheerful, Bright Background -->
+  <!-- Bright, Cheerful Pure White Canvas -->
   <rect width="512" height="512" rx="140" fill="#FFFFFF" />
 
-  <!-- Stylized Play Button / R Ribbon -->
-  <g filter="url(#glow)">
-    <!-- Main outer play/R curve -->
-    <path d="M 160 120 L 160 392 C 160 405 175 412 185 404 L 380 268 C 390 260 390 252 380 244 L 240 140 C 230 132 215 138 215 152 L 215 270" 
-          fill="none" 
-          stroke="url(#primaryGrad)" 
-          stroke-width="44" 
-          stroke-linecap="round" 
+  <!-- 1. Vibrant Background Base (Sunny Sunset Squircle) -->
+  <rect x="96" y="96" width="320" height="320" rx="80" fill="url(#sunsetGrad)" filter="url(#glassShadow)" />
+
+  <!-- 2. Neon Cyan Play Core (Sits beneath the glass for refraction depth) -->
+  <path d="M 230 196 L 316 256 L 230 316 Z" fill="url(#neonCyanGrad)" />
+
+  <!-- 3. Glassmorphic Frosted Overlay (Minimalist Play Triangle & Stylized R Loop) -->
+  <!-- We overlay a semi-transparent white shape that forms the R-stem and R-loop overlapping the play button -->
+  <g filter="url(#refract)">
+    <!-- Vertical stem of 'R' -->
+    <rect x="176" y="160" width="32" height="192" rx="16" fill="#FFFFFF" fill-opacity="0.25" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="3" />
+
+    <!-- Frosted Glass Play Button Triangle -->
+    <path d="M 216 170 L 336 256 L 216 342 Z" 
+          fill="#FFFFFF" 
+          fill-opacity="0.22" 
+          stroke="#FFFFFF" 
+          stroke-opacity="0.6" 
+          stroke-width="4.5" 
           stroke-linejoin="round" />
 
-    <!-- Innermost playful core (vibrant play indicator) -->
-    <path d="M 235 210 L 295 256 L 235 302 Z" fill="url(#accentGrad)" />
+    <!-- A thin glossy light highlight reflection across the glass play button -->
+    <path d="M 222 178 L 320 256 L 222 256 Z" 
+          fill="#FFFFFF" 
+          fill-opacity="0.12" />
   </g>
 </svg>

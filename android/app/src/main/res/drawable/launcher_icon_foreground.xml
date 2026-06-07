@@ -12,40 +12,57 @@
         android:translateX="71.68"
         android:translateY="71.68">
 
-        <!-- Outer play/R ribbon curve (stroke width 44) -->
+        <!-- 1. Vibrant Background Base (Sunny Sunset Squircle) -->
         <path
-            android:pathData="M 160,120 L 160,392 C 160,405 175,412 185,404 L 380,268 C 390,260 390,252 380,244 L 240,140 C 230,132 215,138 215,152 L 215,270"
-            android:strokeWidth="44"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round">
-            <aapt:attr name="android:strokeColor">
+            android:pathData="M 176,96 L 336,96 C 380,96 416,132 416,176 L 416,336 C 416,380 380,416 336,416 L 176,416 C 132,416 96,380 96,336 L 96,176 C 96,132 132,96 176,96 Z">
+            <aapt:attr name="android:fillColor">
                 <gradient
-                    android:startX="160"
-                    android:startY="120"
-                    android:endX="380"
-                    android:endY="404"
+                    android:startX="96"
+                    android:startY="96"
+                    android:endX="416"
+                    android:endY="416"
                     android:type="linear">
-                    <item android:offset="0" android:color="#FF2D55" /> <!-- Cheerful Pink -->
-                    <item android:offset="0.5" android:color="#FF5E3A" /> <!-- Orange -->
-                    <item android:offset="1" android:color="#FFB300" /> <!-- Sunset Gold -->
+                    <item android:offset="0" android:color="#FF2D55" /> <!-- Cheerful Hot Pink -->
+                    <item android:offset="0.5" android:color="#FF5E3A" /> <!-- Coral -->
+                    <item android:offset="1" android:color="#FFD60A" /> <!-- Sunny Gold -->
                 </gradient>
             </aapt:attr>
         </path>
 
-        <!-- Innermost playful play core indicator -->
+        <!-- 2. Neon Cyan Play Core (Sits beneath the glass for refraction depth) -->
         <path
-            android:pathData="M 235,210 L 295,256 L 235,302 Z">
+            android:pathData="M 230,196 L 316,256 L 230,316 Z">
             <aapt:attr name="android:fillColor">
                 <gradient
-                    android:startX="235"
-                    android:startY="210"
-                    android:endX="295"
-                    android:endY="302"
+                    android:startX="230"
+                    android:startY="196"
+                    android:endX="316"
+                    android:endY="316"
                     android:type="linear">
-                    <item android:offset="0" android:color="#FF2D55" />
-                    <item android:offset="1" android:color="#AF52DE" /> <!-- Purple -->
+                    <item android:offset="0" android:color="#00C6FF" /> <!-- Electric Cyan -->
+                    <item android:offset="1" android:color="#0072FF" /> <!-- Bright Blue -->
                 </gradient>
             </aapt:attr>
         </path>
+
+        <!-- 3. Glassmorphic Frosted R-Stem -->
+        <path
+            android:pathData="M 192,160 C 201,160 208,167 208,176 L 208,336 C 208,345 201,352 192,352 C 183,352 176,345 176,336 L 176,176 C 176,167 183,160 192,160 Z"
+            android:fillColor="#40FFFFFF"
+            android:strokeColor="#99FFFFFF"
+            android:strokeWidth="3" />
+
+        <!-- 4. Glassmorphic Frosted Play Triangle -->
+        <path
+            android:pathData="M 216,170 L 336,256 L 216,342 Z"
+            android:fillColor="#38FFFFFF"
+            android:strokeColor="#99FFFFFF"
+            android:strokeWidth="4.5"
+            android:strokeLineJoin="round" />
+
+        <!-- 5. Glassmorphic Light Highlight Reflection -->
+        <path
+            android:pathData="M 222,178 L 320,256 L 222,256 Z"
+            android:fillColor="#1FFFFFFF" />
     </group>
 </vector>
