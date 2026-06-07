@@ -12,85 +12,71 @@
         android:translateX="71.68"
         android:translateY="71.68">
 
-        <!-- 1. Soft Cheerful Inner Squircle Card -->
+        <!-- Cheerful Soft Sky Blue base card -->
         <path
-            android:pathData="M 160,64 L 352,64 C 405,64 448,107 448,160 L 448,352 C 448,405 405,448 352,448 L 160,448 C 107,448 64,405 64,352 L 64,160 C 64,107 107,64 160,64 Z"
-            android:strokeColor="#1EFFFFFF"
-            android:strokeWidth="1.5">
-            <aapt:attr name="android:fillColor">
-                <gradient
-                    android:startX="64"
-                    android:startY="64"
-                    android:endX="448"
-                    android:endY="448"
-                    android:type="linear">
-                    <item android:offset="0" android:color="#FFF0F5" /> <!-- Lavender Blush -->
-                    <item android:offset="1" android:color="#E8F0FE" /> <!-- Soft Sky Blue -->
-                </gradient>
-            </aapt:attr>
-        </path>
+            android:pathData="M 166,76 L 346,76 C 396,76 436,116 436,166 L 436,346 C 436,396 396,436 346,436 L 166,436 C 116,436 76,396 76,346 L 76,166 C 76,116 116,76 166,76 Z"
+            android:fillColor="#F4F8FD"
+            android:strokeColor="#E6EEF8"
+            android:strokeWidth="1.5" />
 
-        <!-- 2. R Kickstand path (Vibrant Coral to Gold Gradient, stroke width 50) -->
-        <path
-            android:pathData="M 215,255 L 295,367"
-            android:strokeWidth="50"
-            android:strokeLineCap="round">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:startX="215"
-                    android:startY="255"
-                    android:endX="295"
-                    android:endY="367"
-                    android:type="linear">
-                    <item android:offset="0" android:color="#FF5E3A" />
-                    <item android:offset="1" android:color="#FFCC00" />
-                </gradient>
-            </aapt:attr>
-        </path>
+        <!-- Blades Group (translated to center 256, 256 for rotations) -->
+        <group
+            android:translateX="256"
+            android:translateY="256">
 
-        <!-- 3. Vertical Stem of the 'R' (Vibrant Hot Pink to Coral Gradient) -->
-        <path
-            android:pathData="M 175,120 C 189,120 200,131 200,145 L 200,367 C 200,381 189,392 175,392 C 161,392 150,381 150,367 L 150,145 C 150,131 161,120 175,120 Z">
-            <aapt:attr name="android:fillColor">
-                <gradient
-                    android:startX="150"
-                    android:startY="120"
-                    android:endX="200"
-                    android:endY="392"
-                    android:type="linear">
-                    <item android:offset="0" android:color="#FF2D55" />
-                    <item android:offset="1" android:color="#FF5E3A" />
-                </gradient>
-            </aapt:attr>
-        </path>
+            <!-- Blade 1: Pink (0 deg) -->
+            <group android:rotation="0">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CCFF5E8A" />
+            </group>
 
-        <!-- 4. Play Core (Vibrant Cyan-to-Blue Gradient inside the loop) -->
-        <path
-            android:pathData="M 225,165 L 290,202 L 225,240 Z">
-            <aapt:attr name="android:fillColor">
-                <gradient
-                    android:startX="225"
-                    android:startY="165"
-                    android:endX="290"
-                    android:endY="240"
-                    android:type="linear">
-                    <item android:offset="0" android:color="#00E5FF" />
-                    <item android:offset="1" android:color="#0088FF" />
-                </gradient>
-            </aapt:attr>
-        </path>
+            <!-- Blade 2: Yellow (60 deg) -->
+            <group android:rotation="60">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CCFFE169" />
+            </group>
 
-        <!-- 5. Frosted Glass Play Loop of the 'R' (semi-transparent white with white border) -->
-        <path
-            android:pathData="M 190,120 L 330,195 C 342,201 342,209 330,215 L 190,290 Z"
-            android:fillColor="#40FFFFFF"
-            android:strokeColor="#B3FFFFFF"
-            android:strokeWidth="5"
-            android:strokeLineJoin="round" />
+            <!-- Blade 3: Blue (120 deg) -->
+            <group android:rotation="120">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CC6BD6FF" />
+            </group>
 
-        <!-- 6. Glass Highlights -->
-        <path
-            android:pathData="M 195,130 L 315,195 L 195,210 Z"
-            android:fillColor="#1FFFFFFF" />
+            <!-- Blade 4: Pink (180 deg) -->
+            <group android:rotation="180">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CCFF5E8A" />
+            </group>
+
+            <!-- Blade 5: Yellow (240 deg) -->
+            <group android:rotation="240">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CCFFE169" />
+            </group>
+
+            <!-- Blade 6: Blue (300 deg) -->
+            <group android:rotation="300">
+                <path
+                    android:pathData="M 0,0 L 0,-130 C 40,-130 80,-90 80,-50 Z"
+                    android:fillColor="#CC6BD6FF" />
+            </group>
+
+            <!-- Central Glassy Shutter/Lens Ring -->
+            <path
+                android:pathData="M 0,0 m -45,0 a 45,45 0 1,1 90,0 a 45,45 0 1,1 -90,0"
+                android:fillColor="#4DFFFFFF"
+                android:strokeColor="#E6FFFFFF"
+                android:strokeWidth="4" />
+
+            <!-- Central Play Button -->
+            <path
+                android:pathData="M -12,-18 L 18,0 L -12,18 Z"
+                android:fillColor="#FFFFFF" />
+        </group>
     </group>
 </vector>

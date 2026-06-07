@@ -1,75 +1,30 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Soft Cheerful Pastel Background Gradient -->
-    <linearGradient id="pastelBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFF0F5" /> <!-- Lavender Blush -->
-      <stop offset="100%" stop-color="#E8F0FE" /> <!-- Soft Sky Blue -->
-    </linearGradient>
-
-    <!-- Vibrant Cheerful Rose-Coral Gradient for the R stem -->
-    <linearGradient id="roseCoralGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#FF2D55" /> <!-- Cheerful Hot Pink -->
-      <stop offset="100%" stop-color="#FF5E3A" /> <!-- Vibrant Coral -->
-    </linearGradient>
-
-    <!-- Coral-to-Gold Gradient for the R kickstand -->
-    <linearGradient id="coralGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF5E3A" />
-      <stop offset="100%" stop-color="#FFCC00" /> <!-- Sunset Gold -->
-    </linearGradient>
-
-    <!-- Refraction Gradient for the Play Core -->
-    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00E5FF" /> <!-- Cyan -->
-      <stop offset="100%" stop-color="#0088FF" /> <!-- Cheerful Blue -->
-    </linearGradient>
-
-    <!-- Soft Shadows -->
-    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#FF2D55" flood-opacity="0.15" />
-    </filter>
-
-    <filter id="glassRefract" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.06" />
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#FF3366" flood-opacity="0.1" />
     </filter>
   </defs>
-
-  <!-- Clean, Cheerful, Bright Background Canvas -->
   <rect width="512" height="512" rx="140" fill="#FFFFFF" />
+  <!-- Cheerful Soft Sky Blue base card -->
+  <rect x="76" y="76" width="360" height="360" rx="90" fill="#F4F8FD" stroke="#E6EEF8" stroke-width="1.5" />
 
-  <!-- 1. Soft Cheerful Inner Squircle -->
-  <rect x="64" y="64" width="384" height="384" rx="96" fill="url(#pastelBgGrad)" stroke="#E5E2F0" stroke-width="1.5" />
-
-  <!-- 2. R Logo Group with recognizable letter R structure -->
-  <g filter="url(#softShadow)">
+  <g filter="url(#glow)" transform="translate(256, 256)">
+    <!-- 6 rotating, overlapping rounded blades in pink, yellow, blue -->
+    <!-- Blade 1: Pink -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#FF5E8A" opacity="0.8" transform="rotate(0)" />
+    <!-- Blade 2: Yellow -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#FFE169" opacity="0.8" transform="rotate(60)" />
+    <!-- Blade 3: Blue -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#6BD6FF" opacity="0.8" transform="rotate(120)" />
+    <!-- Blade 4: Pink -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#FF5E8A" opacity="0.8" transform="rotate(180)" />
+    <!-- Blade 5: Yellow -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#FFE169" opacity="0.8" transform="rotate(240)" />
+    <!-- Blade 6: Blue -->
+    <path d="M 0,0 L 0,-130 C 40,-130, 80,-90, 80,-50 Z" fill="#6BD6FF" opacity="0.8" transform="rotate(300)" />
     
-    <!-- Kickstand of the 'R' (stretches to bottom-right, fits behind the glass loop) -->
-    <path d="M 215 255 L 295 367" 
-          fill="none" 
-          stroke="url(#coralGoldGrad)" 
-          stroke-width="50" 
-          stroke-linecap="round" />
-
-    <!-- Vertical Stem of the 'R' (pink-coral gradient) -->
-    <rect x="150" y="120" width="50" height="272" rx="25" fill="url(#roseCoralGrad)" />
-
-    <!-- Play Core (Vibrant cyan triangle sitting inside the glass loop) -->
-    <path d="M 225 165 L 290 202 L 225 240 Z" fill="url(#cyanGrad)" />
-
-    <!-- Frosted Glass Play Loop of the 'R' (overlaps the stem and kickstand) -->
-    <path d="M 190 120 L 330 195 C 342 201, 342 209, 330 215 L 190 290 Z" 
-          fill="#FFFFFF" 
-          fill-opacity="0.25" 
-          stroke="#FFFFFF" 
-          stroke-opacity="0.7" 
-          stroke-width="5" 
-          stroke-linejoin="round" 
-          filter="url(#glassRefract)" />
-
-    <!-- Glass gloss highlights -->
-    <path d="M 195 130 L 315 195 L 195 210 Z" 
-          fill="#FFFFFF" 
-          fill-opacity="0.12" />
-
+    <!-- Central glassy eye/lens element -->
+    <circle cx="0" cy="0" r="45" fill="#FFFFFF" fill-opacity="0.3" stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="4" />
+    <polygon points="-12,-18 18,0 -12,18" fill="#FFFFFF" />
   </g>
 </svg>
