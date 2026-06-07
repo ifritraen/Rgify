@@ -37,7 +37,6 @@ class _ViewerScreenState extends State<ViewerScreen> {
       Provider.of<PlaybackQueueProvider>(context, listen: false)
           .setQueue(widget.gifs, widget.initialIndex);
 
-      VideoCacheManager.preloadVideo(widget.gifs[widget.initialIndex]);
       if (widget.initialIndex + 1 < widget.gifs.length) {
         VideoCacheManager.preloadVideo(widget.gifs[widget.initialIndex + 1]);
       }
@@ -94,8 +93,7 @@ class _ViewerScreenState extends State<ViewerScreen> {
               setState(() {
                 _currentPageIndex = index;
               });
-              // Preload current and next videos
-              VideoCacheManager.preloadVideo(gifsList[index]);
+              // Preload next video
               if (index + 1 < gifsList.length) {
                 VideoCacheManager.preloadVideo(gifsList[index + 1]);
               }

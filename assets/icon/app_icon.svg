@@ -37,8 +37,8 @@
     </filter>
   </defs>
 
-  <!-- Background -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" />
+  <!-- Circular Background (Instead of square/rect) -->
+  <circle cx="256" cy="256" r="248" fill="url(#bgGrad)" stroke="url(#cyanGrad)" stroke-width="4" />
 
   <!-- Outer Glassy Ring -->
   <circle cx="256" cy="256" r="210" fill="none" stroke="url(#cyanGrad)" stroke-width="4" stroke-opacity="0.3" />
