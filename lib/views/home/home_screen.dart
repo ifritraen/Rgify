@@ -345,63 +345,85 @@ class _HomeScreenState extends State<HomeScreen> {
         //   ],
         // ),
         // drawer: const SidebarDrawer(),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification notification) {
-            if (notification is ScrollUpdateNotification) {
-              final double scrollDelta = notification.scrollDelta ?? 0.0;
-              if (scrollDelta > 2.0) {
-                // Scrolling down - hide bottom bar
-                if (_isBottomBarVisible) {
-                  setState(() {
-                    _isBottomBarVisible = false;
-                  });
-                  HomeScreen.headerVisibility.value = false;
-                }
-              } else if (scrollDelta < -2.0) {
-                // Scrolling up - show bottom bar
-                if (!_isBottomBarVisible) {
-                  setState(() {
-                    _isBottomBarVisible = true;
-                  });
-                  HomeScreen.headerVisibility.value = true;
-                }
+        body: Listener(
+          onPointerMove: (PointerMoveEvent event) {
+            final double dy = event.delta.dy;
+            if (dy < -3.0) {
+              // User dragged finger up -> scrolling down -> hide bottom/top bars
+              if (_isBottomBarVisible) {
+                setState(() {
+                  _isBottomBarVisible = false;
+                });
+                HomeScreen.headerVisibility.value = false;
+              }
+            } else if (dy > 3.0) {
+              // User dragged finger down -> scrolling up -> show bottom/top bars
+              if (!_isBottomBarVisible) {
+                setState(() {
+                  _isBottomBarVisible = true;
+                });
+                HomeScreen.headerVisibility.value = true;
               }
             }
-            return false;
           },
-          child: Stack(
-            children: [
-              activeBody,
-              const BulkActionBar(),
-              // Custom floating frosted-glass bottom bar
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                bottom: _isBottomBarVisible ? 20 : -80,
-                left: 24,
-                right: 24,
-                height: 54,
-                child: GlassyContainer(
-                  borderRadius: 27,
-                  color: AppTheme.glassBg,
-                  borderColor: AppTheme.border,
-                  borderWidth: 1.0,
-                  boxShadow: AppTheme.cardGlow,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
-                      _buildNavItem(1, Icons.explore_outlined, Icons.explore, 'Explore'),
-                      _buildNavItem(-1, Icons.search_outlined, Icons.search, 'Search', onTapOverride: _showSearchBottomSheet),
-                      _buildNavItem(2, Icons.folder_open_outlined, Icons.folder_open, 'Local'),
-                      _buildNavItem(3, Icons.bookmark_outline, Icons.bookmark, 'Library'),
-                      // _buildNavItem(3, Icons.psychology_outlined, Icons.psychology, 'AI Gen'),
-                      _buildNavItem(4, Icons.person_outline, Icons.person, 'Me'),
-                    ],
+          child: NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              if (notification is ScrollUpdateNotification) {
+                final double scrollDelta = notification.scrollDelta ?? 0.0;
+                if (scrollDelta > 2.0) {
+                  // Scrolling down - hide bottom bar
+                  if (_isBottomBarVisible) {
+                    setState(() {
+                      _isBottomBarVisible = false;
+                    });
+                    HomeScreen.headerVisibility.value = false;
+                  }
+                } else if (scrollDelta < -2.0) {
+                  // Scrolling up - show bottom bar
+                  if (!_isBottomBarVisible) {
+                    setState(() {
+                      _isBottomBarVisible = true;
+                    });
+                    HomeScreen.headerVisibility.value = true;
+                  }
+                }
+              }
+              return false;
+            },
+            child: Stack(
+              children: [
+                activeBody,
+                const BulkActionBar(),
+                // Custom floating frosted-glass bottom bar
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  bottom: _isBottomBarVisible ? 20 : -80,
+                  left: 24,
+                  right: 24,
+                  height: 54,
+                  child: GlassyContainer(
+                    borderRadius: 27,
+                    color: AppTheme.glassBg,
+                    borderColor: AppTheme.border,
+                    borderWidth: 1.0,
+                    boxShadow: AppTheme.cardGlow,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildNavItem(0, Icons.home_outlined, Icons.home, 'Home'),
+                        _buildNavItem(1, Icons.explore_outlined, Icons.explore, 'Explore'),
+                        _buildNavItem(-1, Icons.search_outlined, Icons.search, 'Search', onTapOverride: _showSearchBottomSheet),
+                        _buildNavItem(2, Icons.folder_open_outlined, Icons.folder_open, 'Local'),
+                        _buildNavItem(3, Icons.bookmark_outline, Icons.bookmark, 'Library'),
+                        // _buildNavItem(3, Icons.psychology_outlined, Icons.psychology, 'AI Gen'),
+                        _buildNavItem(4, Icons.person_outline, Icons.person, 'Me'),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

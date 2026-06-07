@@ -1,55 +1,75 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Vibrant Cheerful Gradients -->
-    <linearGradient id="sunsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Soft Cheerful Pastel Background Gradient -->
+    <linearGradient id="pastelBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF0F5" /> <!-- Lavender Blush -->
+      <stop offset="100%" stop-color="#E8F0FE" /> <!-- Soft Sky Blue -->
+    </linearGradient>
+
+    <!-- Vibrant Cheerful Rose-Coral Gradient for the R stem -->
+    <linearGradient id="roseCoralGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#FF2D55" /> <!-- Cheerful Hot Pink -->
-      <stop offset="50%" stop-color="#FF5E3A" /> <!-- Vibrant Coral -->
-      <stop offset="100%" stop-color="#FFD60A" /> <!-- Sunny Gold -->
+      <stop offset="100%" stop-color="#FF5E3A" /> <!-- Vibrant Coral -->
     </linearGradient>
 
-    <linearGradient id="neonCyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00C6FF" /> <!-- Electric Cyan -->
-      <stop offset="100%" stop-color="#0072FF" /> <!-- Bright Blue -->
+    <!-- Coral-to-Gold Gradient for the R kickstand -->
+    <linearGradient id="coralGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5E3A" />
+      <stop offset="100%" stop-color="#FFCC00" /> <!-- Sunset Gold -->
     </linearGradient>
 
-    <!-- Glass Dropshadow -->
-    <filter id="glassShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#FF2D55" flood-opacity="0.15" />
+    <!-- Refraction Gradient for the Play Core -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" /> <!-- Cyan -->
+      <stop offset="100%" stop-color="#0088FF" /> <!-- Cheerful Blue -->
+    </linearGradient>
+
+    <!-- Soft Shadows -->
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#FF2D55" flood-opacity="0.15" />
     </filter>
 
-    <!-- Refraction Shadows -->
-    <filter id="refract" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="6" stdDeviation="4" flood-color="#000000" flood-opacity="0.08" />
+    <filter id="glassRefract" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#000000" flood-opacity="0.06" />
     </filter>
   </defs>
 
-  <!-- Bright, Cheerful Pure White Canvas -->
+  <!-- Clean, Cheerful, Bright Background Canvas -->
   <rect width="512" height="512" rx="140" fill="#FFFFFF" />
 
-  <!-- 1. Vibrant Background Base (Sunny Sunset Squircle) -->
-  <rect x="96" y="96" width="320" height="320" rx="80" fill="url(#sunsetGrad)" filter="url(#glassShadow)" />
+  <!-- 1. Soft Cheerful Inner Squircle -->
+  <rect x="64" y="64" width="384" height="384" rx="96" fill="url(#pastelBgGrad)" stroke="#E5E2F0" stroke-width="1.5" />
 
-  <!-- 2. Neon Cyan Play Core (Sits beneath the glass for refraction depth) -->
-  <path d="M 230 196 L 316 256 L 230 316 Z" fill="url(#neonCyanGrad)" />
+  <!-- 2. R Logo Group with recognizable letter R structure -->
+  <g filter="url(#softShadow)">
+    
+    <!-- Kickstand of the 'R' (stretches to bottom-right, fits behind the glass loop) -->
+    <path d="M 215 255 L 295 367" 
+          fill="none" 
+          stroke="url(#coralGoldGrad)" 
+          stroke-width="50" 
+          stroke-linecap="round" />
 
-  <!-- 3. Glassmorphic Frosted Overlay (Minimalist Play Triangle & Stylized R Loop) -->
-  <!-- We overlay a semi-transparent white shape that forms the R-stem and R-loop overlapping the play button -->
-  <g filter="url(#refract)">
-    <!-- Vertical stem of 'R' -->
-    <rect x="176" y="160" width="32" height="192" rx="16" fill="#FFFFFF" fill-opacity="0.25" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="3" />
+    <!-- Vertical Stem of the 'R' (pink-coral gradient) -->
+    <rect x="150" y="120" width="50" height="272" rx="25" fill="url(#roseCoralGrad)" />
 
-    <!-- Frosted Glass Play Button Triangle -->
-    <path d="M 216 170 L 336 256 L 216 342 Z" 
+    <!-- Play Core (Vibrant cyan triangle sitting inside the glass loop) -->
+    <path d="M 225 165 L 290 202 L 225 240 Z" fill="url(#cyanGrad)" />
+
+    <!-- Frosted Glass Play Loop of the 'R' (overlaps the stem and kickstand) -->
+    <path d="M 190 120 L 330 195 C 342 201, 342 209, 330 215 L 190 290 Z" 
           fill="#FFFFFF" 
-          fill-opacity="0.22" 
+          fill-opacity="0.25" 
           stroke="#FFFFFF" 
-          stroke-opacity="0.6" 
-          stroke-width="4.5" 
-          stroke-linejoin="round" />
+          stroke-opacity="0.7" 
+          stroke-width="5" 
+          stroke-linejoin="round" 
+          filter="url(#glassRefract)" />
 
-    <!-- A thin glossy light highlight reflection across the glass play button -->
-    <path d="M 222 178 L 320 256 L 222 256 Z" 
+    <!-- Glass gloss highlights -->
+    <path d="M 195 130 L 315 195 L 195 210 Z" 
           fill="#FFFFFF" 
           fill-opacity="0.12" />
+
   </g>
 </svg>
