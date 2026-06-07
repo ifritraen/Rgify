@@ -11,6 +11,7 @@ import '../../providers/feed_provider.dart';
 import '../../providers/selection_provider.dart';
 import '../../providers/library_provider.dart';
 import '../../providers/download_provider.dart';
+import '../../providers/search_provider.dart';
 import '../../services/video_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../providers/playback_settings_provider.dart';
@@ -23,37 +24,6 @@ import 'tag_results_screen.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../widgets/subscribe_button.dart';
 
-Widget _buildCreatorOverlay(BuildContext context) {
-  final libraryProvider = Provider.of<LibraryProvider>(context);
-  return GestureDetector(
-    onTap: () {
-      if (_controller != null) _controller!.pause();
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => CreatorProfileScreen(username: widget.gif.userName)),
-      );
-    },
-    child: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          '@${widget.gif.userName}',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.bold,
-            shadows: [Shadow(color: Colors.black, blurRadius: 4)],
-          ),
-        ),
-        const SizedBox(width: 6),
-        if (widget.gif.verified)
-          const Icon(Icons.verified, size: 14, color: AppTheme.accentNeon),
-        const SizedBox(width: 6),
-        SubscribeButton(creatorId: widget.gif.userName),
-      ],
-    ),
-  );
-}
 
 class ReelsPlayerItem extends StatefulWidget {
   final GifInfo gif;
@@ -681,8 +651,11 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          if (widget.gif.verified)
+                          if (widget.gif.verified) ...[
                             const Icon(Icons.verified, size: 14, color: AppTheme.accentNeon),
+                            const SizedBox(width: 6),
+                          ],
+                          SubscribeButton(creatorId: widget.gif.userName),
                         ],
                       ),
                     ),

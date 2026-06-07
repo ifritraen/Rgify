@@ -4,18 +4,6 @@ RedGify is a premium, state-of-the-art Flutter mobile application designed for b
 
 ---
 
-## 📸 App Showcase
-
-Here is a visual overview of RedGify's clean, minimalist layout and features:
-
-| 📱 Reels Player UI | 🔍 Explore Hub |
-| :---: | :---: |
-| ![Reels Player UI](assets/showcase/showcase_feed.png) | ![Explore Hub](assets/showcase/showcase_explore.png) |
-
-| 📊 Me Profile Analytics | 📂 Library & Playlists |
-| :---: | :---: |
-| ![Me Profile Analytics](assets/showcase/showcase_profile.png) | ![Library & Playlists](assets/showcase/showcase_library.png) |
-
 ---
 
 ## ✨ Features Checklist
