@@ -54,6 +54,10 @@ class VideoCacheManager {
       final cachePath = await getCacheFilePath(id);
       final client = http.Client();
       final request = http.Request('GET', Uri.parse(mediaUrl));
+      request.headers.addAll({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': 'https://www.redgifs.com/',
+      });
       final response = await client.send(request);
 
       if (response.statusCode == 200) {

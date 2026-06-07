@@ -119,7 +119,13 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
       if (downloaded != null && downloaded.localPath.isNotEmpty && File(downloaded.localPath).existsSync()) {
         _controller = VideoPlayerController.file(File(downloaded.localPath));
       } else {
-        _controller = VideoPlayerController.networkUrl(Uri.parse(mediaUrl));
+        _controller = VideoPlayerController.networkUrl(
+          Uri.parse(mediaUrl),
+          httpHeaders: const {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Referer': 'https://www.redgifs.com/',
+          },
+        );
       }
     }
 
