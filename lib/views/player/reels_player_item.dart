@@ -11,6 +11,7 @@ import '../../providers/download_provider.dart';
 import '../../services/video_cache_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../providers/playback_settings_provider.dart';
+import '../../providers/playback_queue_provider.dart';
 import '../widgets/inactivity_monitor.dart';
 import '../widgets/playlist_selector_sheet.dart';
 import '../widgets/neon_vector_buttons.dart';
@@ -682,12 +683,20 @@ class _ReelsPlayerItemState extends State<ReelsPlayerItem> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  // Playback Settings Consumer for Shuffle, Repeat, Autoplay
-                  Consumer<PlaybackSettingsProvider>(
-                    builder: (context, playbackSettings, child) {
+                   // Playback Settings Consumer for Shuffle, Repeat, Autoplay, Queue
+                  Consumer2<PlaybackSettingsProvider, PlaybackQueueProvider>(
+                    builder: (context, playbackSettings, queueProvider, child) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          _buildHUDIconButton(
+                            icon: Icons.queue_play_next,
+                            label: 'Queue',
+                            isActive: queueProvider.showQueueSidebar,
+                            activeGlowColor: AppTheme.primaryNeon,
+                            onTap: () => queueProvider.toggleQueueSidebar(),
+                          ),
+                          const SizedBox(height: 12),
                           _buildHUDIconButton(
                             icon: playbackSettings.shuffleEnabled ? Icons.shuffle : Icons.shuffle_outlined,
                             label: 'Shuffle',

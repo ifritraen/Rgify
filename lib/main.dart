@@ -11,6 +11,7 @@ import 'providers/explore_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/playback_settings_provider.dart';
+import 'providers/playback_queue_provider.dart';
 import 'services/video_cache_manager.dart';
 import 'config/theme.dart';
 import 'views/home/home_screen.dart';
@@ -29,6 +30,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => LibraryProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
         ChangeNotifierProvider(create: (_) => PlaybackSettingsProvider()),
+        ChangeNotifierProvider(create: (_) => PlaybackQueueProvider()),
         // ChangeNotifierProvider(create: (_) => AIProvider()),
         ChangeNotifierProvider(create: (_) => CreatorProfileProvider()),
         ChangeNotifierProvider(create: (_) => SelectionProvider()),
