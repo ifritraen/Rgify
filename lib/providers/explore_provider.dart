@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/gif_info.dart';
 import '../models/user_info.dart';
 import '../models/niche_info.dart';
@@ -7,6 +10,10 @@ import '../services/isar_service.dart';
 
 class ExploreProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
+
+  ExploreProvider() {
+    loadCachedTags();
+  }
 
   // --- GIFs State ---
   final List<GifInfo> _gifs = [];
@@ -114,6 +121,7 @@ class ExploreProvider with ChangeNotifier {
         _hasMoreGifs = false;
       } else {
         _gifs.addAll(uniqueList);
+        collectTagsFromGifs(uniqueList);
         _gifPage++;
       }
     } catch (e) {
@@ -173,6 +181,7 @@ class ExploreProvider with ChangeNotifier {
         _hasMoreImages = false;
       } else {
         _images.addAll(uniqueList);
+        collectTagsFromGifs(uniqueList);
         _imagePage++;
       }
     } catch (e) {
@@ -330,6 +339,7 @@ class ExploreProvider with ChangeNotifier {
         _hasMoreNicheGifs = false;
       } else {
         _nicheGifs.addAll(uniqueList);
+        collectTagsFromGifs(uniqueList);
         _nicheGifsPage++;
       }
     } catch (e) {
@@ -351,17 +361,151 @@ class ExploreProvider with ChangeNotifier {
     await fetchNextNicheGifsPage(bypassCache: true);
   }
 
-  // ==========================================
-  // 5. Tags Actions
-  // ==========================================
+  Future<File> get _localTagsFile async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File('${directory.path}/tags_cache.json');
+  }
+
+  Future<void> loadCachedTags() async {
+    try {
+      final file = await _localTagsFile;
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        final List decoded = json.decode(content);
+        _tags = List<dynamic>.from(decoded);
+        _sortTags();
+      }
+    } catch (_) {}
+    notifyListeners();
+  }
+
+  Future<void> saveCachedTags() async {
+    try {
+      final file = await _localTagsFile;
+      final content = json.encode(_tags);
+      await file.writeAsString(content);
+    } catch (_) {}
+  }
+
+  void _sortTags() {
+    _tags.sort((a, b) {
+      final aName = (a['name'] as String? ?? '').toLowerCase();
+      final bName = (b['name'] as String? ?? '').toLowerCase();
+      return aName.compareTo(bName);
+    });
+  }
+
+  void mergeTags(List<dynamic> newTags) {
+    final Map<String, dynamic> merged = {};
+    for (var tag in _tags) {
+      final name = tag['name'] as String? ?? '';
+      if (name.isNotEmpty) {
+        merged[name.toLowerCase()] = tag;
+      }
+    }
+    
+    for (var tag in newTags) {
+      final name = tag['name'] as String? ?? '';
+      if (name.isEmpty) continue;
+      final key = name.toLowerCase();
+      if (merged.containsKey(key)) {
+        final currentCount = merged[key]['count'] as int? ?? 0;
+        final newCount = tag['count'] as int? ?? 0;
+        if (newCount > currentCount) {
+          merged[key]['count'] = newCount;
+        }
+      } else {
+        merged[key] = {
+          'name': name,
+          'count': tag['count'] ?? 0,
+        };
+      }
+    }
+    
+    _tags = merged.values.toList();
+    _sortTags();
+    saveCachedTags();
+  }
+
+  static Future<void> collectAndSaveTags(List<GifInfo> gifs) async {
+    if (gifs.isEmpty) return;
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/tags_cache.json');
+      List<dynamic> cached = [];
+      if (await file.exists()) {
+        final content = await file.readAsString();
+        cached = List<dynamic>.from(json.decode(content));
+      }
+      
+      final Map<String, dynamic> merged = {};
+      for (var tag in cached) {
+        final name = tag['name'] as String? ?? '';
+        if (name.isNotEmpty) {
+          merged[name.toLowerCase()] = tag;
+        }
+      }
+      
+      for (var gif in gifs) {
+        for (var tagName in gif.tags) {
+          if (tagName.isEmpty) continue;
+          final key = tagName.toLowerCase();
+          if (!merged.containsKey(key)) {
+            merged[key] = {
+              'name': tagName,
+              'count': 0,
+            };
+          }
+        }
+      }
+      
+      final list = merged.values.toList();
+      list.sort((a, b) {
+        final aName = (a['name'] as String? ?? '').toLowerCase();
+        final bName = (b['name'] as String? ?? '').toLowerCase();
+        return aName.compareTo(bName);
+      });
+      
+      await file.writeAsString(json.encode(list));
+    } catch (_) {}
+  }
+
+  Future<void> collectTagsFromGifs(List<GifInfo> gifs) async {
+    await collectAndSaveTags(gifs);
+    await loadCachedTags();
+  }
+
+  Map<String, List<Map<String, dynamic>>> get groupedTags {
+    final groups = <String, List<Map<String, dynamic>>>{};
+    for (var char in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')) {
+      groups[char] = [];
+    }
+    groups['#'] = [];
+    
+    for (var tag in _tags) {
+      final name = tag['name'] as String? ?? '';
+      if (name.isEmpty) continue;
+      final firstChar = name[0].toUpperCase();
+      if (groups.containsKey(firstChar)) {
+        groups[firstChar]!.add(Map<String, dynamic>.from(tag));
+      } else {
+        groups['#']!.add(Map<String, dynamic>.from(tag));
+      }
+    }
+    
+    groups.removeWhere((key, list) => list.isEmpty);
+    return groups;
+  }
+
   Future<void> fetchTrendingTags({bool bypassCache = false}) async {
-    if (_tags.isNotEmpty && !bypassCache) return;
     _isLoadingTags = true;
     _tagsError = null;
     notifyListeners();
 
     try {
-      _tags = await _apiClient.getTrendingTags(bypassCache: bypassCache);
+      await loadCachedTags();
+      final newTags = await _apiClient.getTrendingTags(bypassCache: bypassCache);
+      mergeTags(newTags);
     } catch (e) {
       _tagsError = e.toString();
     } finally {

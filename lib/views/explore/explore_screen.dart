@@ -27,6 +27,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   final ScrollController _nicheScrollController = ScrollController();
   final TextEditingController _tagSearchController = TextEditingController();
 
+  final Map<String, GlobalKey> _sectionKeys = {};
   String _tagSearchQuery = '';
 
   @override
@@ -592,6 +593,29 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       return name.contains(_tagSearchQuery);
     }).toList();
 
+    // Group filtered tags by their uppercase starting letter
+    final Map<String, List<Map<String, dynamic>>> grouped = {};
+    for (var tag in filteredTags) {
+      final name = tag['name'] as String? ?? '';
+      if (name.isEmpty) continue;
+      final char = name[0].toUpperCase();
+      final key = RegExp(r'^[A-Z]$').hasMatch(char) ? char : '#';
+      grouped.putIfAbsent(key, () => []).add(Map<String, dynamic>.from(tag));
+    }
+
+    // Sort sections from A to Z, placing '#' at the end
+    final sortedKeys = grouped.keys.toList()
+      ..sort((a, b) {
+        if (a == '#') return 1;
+        if (b == '#') return -1;
+        return a.compareTo(b);
+      });
+
+    // Make sure GlobalKeys exist for each section
+    for (var key in sortedKeys) {
+      _sectionKeys.putIfAbsent(key, () => GlobalKey());
+    }
+
     return Column(
       children: [
         // Tag search bar
@@ -624,6 +648,48 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             ),
           ),
         ),
+
+        // A-Z Quick Selector
+        if (sortedKeys.isNotEmpty)
+          Container(
+            height: 38,
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: sortedKeys.length,
+              itemBuilder: (context, index) {
+                final key = sortedKeys[index];
+                return Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: ActionChip(
+                    backgroundColor: AppTheme.cardBg,
+                    side: BorderSide(color: AppTheme.borderLight),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    label: Text(
+                      key,
+                      style: const TextStyle(
+                        color: AppTheme.primaryNeon,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    ),
+                    onPressed: () {
+                      final targetKey = _sectionKeys[key];
+                      if (targetKey != null && targetKey.currentContext != null) {
+                        Scrollable.ensureVisible(
+                          targetKey.currentContext!,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+
         Expanded(
           child: RefreshIndicator(
             onRefresh: () => provider.fetchTrendingTags(bypassCache: true),
@@ -646,39 +712,76 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                               child: Center(child: Text('No tags match filters.', style: TextStyle(color: AppTheme.textSecondary))),
                             ),
                           )
-                        : ListView(
+                        : ListView.builder(
                             physics: const AlwaysScrollableScrollPhysics(),
-                            padding: const EdgeInsets.only(left: 16, right: 16, top: 12, bottom: 84),
-                            children: [
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: filteredTags.map((tag) {
-                                  final name = tag['name'] as String? ?? '';
-                                  final count = tag['count'] as int? ?? 0;
-                                  return ActionChip(
-                                    backgroundColor: AppTheme.cardBg,
-                                    side: BorderSide(color: AppTheme.borderLight),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                    label: Text(
-                                      '#$name ($count)',
-                                      style: TextStyle(color: AppTheme.textSecondary.withOpacity(0.9), fontSize: 11),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChangeNotifierProvider(
-                                            create: (_) => SearchProvider()..performSearch(name),
-                                            child: TagResultsScreen(tag: name),
+                            padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 84),
+                            itemCount: sortedKeys.length,
+                            itemBuilder: (context, sectionIndex) {
+                              final sectionKey = sortedKeys[sectionIndex];
+                              final sectionTags = grouped[sectionKey] ?? [];
+
+                              return Column(
+                                key: _sectionKeys[sectionKey],
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Alphabet Section Header
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16, bottom: 8),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          sectionKey,
+                                          style: GoogleFonts.outfit(
+                                            color: AppTheme.primaryNeon,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
                                           ),
                                         ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Divider(
+                                            color: AppTheme.primaryNeon.withOpacity(0.3),
+                                            thickness: 1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  // Tags Wrap
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: sectionTags.map((tag) {
+                                      final name = tag['name'] as String? ?? '';
+                                      final count = tag['count'] as int? ?? 0;
+                                      return ActionChip(
+                                        backgroundColor: AppTheme.cardBg,
+                                        side: BorderSide(color: AppTheme.borderLight),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        label: Text(
+                                          '#$name ($count)',
+                                          style: TextStyle(
+                                            color: AppTheme.textSecondary.withOpacity(0.9),
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => ChangeNotifierProvider(
+                                                create: (_) => SearchProvider()..performSearch(name),
+                                                child: TagResultsScreen(tag: name),
+                                              ),
+                                            ),
+                                          );
+                                        },
                                       );
-                                    },
-                                  );
-                                }).toList(),
-                              ),
-                            ],
+                                    }).toList(),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
           ),
         ),

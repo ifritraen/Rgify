@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/gif_info.dart';
 import '../services/api_client.dart';
 import '../services/isar_service.dart';
+import 'explore_provider.dart';
 
 class FeedProvider with ChangeNotifier {
   final ApiClient _apiClient = ApiClient();
@@ -67,6 +68,7 @@ class FeedProvider with ChangeNotifier {
         _hasMore = false;
       } else {
         _gifs.addAll(filteredGifs);
+        ExploreProvider.collectAndSaveTags(filteredGifs);
         _currentPage++;
       }
     } catch (e) {
