@@ -54,3 +54,7 @@ auth.txt
 out.txt
 scratch/
 .agents/
+.env
+secrets.*
+sensitive.*
+
